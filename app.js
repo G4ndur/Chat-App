@@ -123,8 +123,6 @@ export default class App {
         noticesContainer.innerHTML = '';
 
         notes.forEach(notice => {
-            noticesContainer.querySelector('.delete')
-                ?.addEventListener('click', this.DeleteNotice(notice).bind(this));
             const div = document.createElement('div')
             div.innerHTML = NoticeTemplate(notice);
             noticesContainer.appendChild(div);
@@ -132,7 +130,7 @@ export default class App {
 
 
             div.querySelector('input').oninput = e => this.onChangeNoticeTitle(e, notice);
-            noticesContainer.querySelector('.delete').addEventListener('click', this.onDeleteNotice(this.no))
+            noticesContainer.querySelector('.delete').addEventListener('click', this.DeleteNotice().bind(this))
         });
     }
 
@@ -161,7 +159,7 @@ export default class App {
     }
 
     DeleteNotice(notice) {
-
-        notes.indexOf(this.notice.createdAt)
+        let a = notes.indexOf(notice.createdAt)
+        notes.splice(a, 1)
     }
 };
