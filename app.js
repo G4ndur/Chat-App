@@ -23,11 +23,7 @@ class Notice {
 }
 
 
-const notes = [
-    new Notice('Test 1'),
-    new Notice('Test 2'),
-    new Notice('Test 3'),
-];
+let notes = [];
 
 
 const template = `
@@ -127,9 +123,12 @@ export default class App {
                 () => this.onDeleteNotice(notice)
             )
         });
+        localStorage.setItem('Notices', JSON.stringify(notes))
     }
 
     run() {
+        notes = localStorage.getItem('Notices')
+        notes = JSON.parse(notes)
         this.render();
 
 
@@ -142,7 +141,7 @@ export default class App {
     onChangeNoticeTitle(e, notice) {
         notice.title = e.target.value.trim();
         notice.updatedAt = new Date();
-
+        localStorage.setItem('Notices', JSON.stringify(notes))
         console.log(notice);
     }
 
