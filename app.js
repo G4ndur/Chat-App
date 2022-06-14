@@ -97,14 +97,6 @@ export default class App {
      * @type {HTMLElement}
      */
     container;
-    /**
-     *  @type {Notice}
-     */
-    test;
-    /**
-     *  @type {number}
-     */
-    Index;
 
     /**
      * @param {HTMLElement} container
@@ -126,20 +118,21 @@ export default class App {
             const div = document.createElement('div')
             div.innerHTML = NoticeTemplate(notice);
             noticesContainer.appendChild(div);
-            //div.querySelector('.delete').addEventListener('click', this.onDeleteNotice(notice).bind(this))
 
 
             div.querySelector('input').oninput = e => this.onChangeNoticeTitle(e, notice);
-            noticesContainer.querySelector('.delete').addEventListener('click', this.DeleteNotice().bind(this))
+            ;
+            div.querySelector('.delete').addEventListener(
+                'click',
+                () => this.onDeleteNotice(notice)
+            )
         });
     }
 
     run() {
         this.render();
 
-        // TODO: löschen implementieren
-        // indexOf() -1 | index
-        // splice()
+
     }
 
     /**
@@ -158,8 +151,8 @@ export default class App {
         this.render();
     }
 
-    DeleteNotice(notice) {
-        let a = notes.indexOf(notice.createdAt)
-        notes.splice(a, 1)
+    onDeleteNotice(notice) {
+        notes.splice(notes.indexOf(notice), 1)
+        this.render();
     }
 };
