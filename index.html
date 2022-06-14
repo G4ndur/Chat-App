@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Notice-App</title>
+    <link href="css/bootstrap.css" rel="stylesheet">
+
+</head>
+<body>
+
+<h1 class="text-center"> Notice-App </h1>
+<div class="container">
+    <div class="row">
+        <div class="col-2"></div>
+        <h4 class="col">Notices</h4>
+        <div class="col">
+            <button class="btn btn-outline-success">+</button>
+        </div>
+    </div>
+    <br>
+    <div class="row">
+        <div class="col-2"></div>
+        <div class="col">
+            <form>
+                <div class="mb-3">
+                    <input type="text">
+                </div>
+            </form>
+        </div>
+        <div class="col">
+            <button class="btn btn-outline-primary">Edit</button>
+            <button class="btn btn-outline-danger">Del</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-2"></div>
+        <div class="col">
+            <form>
+                <div class="mb-3">
+                    <input type="text">
+                </div>
+            </form>
+        </div>
+        <div class="col">
+            <button class="btn btn-outline-primary">Edit</button>
+            <button class="btn btn-outline-danger">Del</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-2"></div>
+        <div class="col">
+            <form>
+                <div class="mb-3">
+                    <input type="text">
+                </div>
+            </form>
+        </div>
+        <div class="col">
+            <button class="btn btn-outline-primary">Edit</button>
+            <button class="btn btn-outline-danger">Del</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-2"></div>
+        <div class="col">
+            <form>
+                <div class="mb-3">
+                    <input type="text">
+                </div>
+            </form>
+        </div>
+        <div class="col">
+            <button class="btn btn-outline-primary">Edit</button>
+            <button class="btn btn-outline-danger">Del</button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-2"></div>
+        <div class="col">
+            <form>
+                <div class="mb-3">
+                    <input type="text">
+                </div>
+            </form>
+        </div>
+        <div class="col">
+            <button class="btn-outline-primary btn">Edit</button>
+            <button class="btn btn-outline-danger">Del</button>
+        </div>
+    </div>
+</div>
+
+<div id="app">
+
+</div>
+
+<script type="module">
+    import App from "./app.js";
+
+    const app = new App(document.getElementById('app'));
+    app.run();
+</script>
+</body>
+</html>
