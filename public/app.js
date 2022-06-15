@@ -81,7 +81,6 @@ const NoticeTemplate = notice => {
             </form>
         </div>
         <div class="col">
-            <button class="btn-outline-primary btn">Edit</button>
             <button class="delete btn btn-outline-danger">Del</button>
         </div>
     </div>
