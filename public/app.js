@@ -22,6 +22,22 @@ class Notice {
     }
 }
 
+class ServerStorage {
+    /**
+     * @param {string} key
+     * @param {string} payload
+     */
+    setItem(key, payload) {
+        return fetch('/storage.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({key: key, payload: payload})
+        });
+    }
+}
+
 
 let notes = [];
 
@@ -95,6 +111,11 @@ export default class App {
     container;
 
     /**
+     * @type {ServerStorage}
+     */
+    serverStorage = new ServerStorage();
+
+    /**
      * @param {HTMLElement} container
      */
     constructor(container) {
@@ -139,12 +160,16 @@ export default class App {
     onChangeNoticeTitle(e, notice) {
         notice.title = e.target.value.trim();
         notice.updatedAt = new Date();
-        localStorage.setItem('Notices', JSON.stringify(notes))
+        localStorage.setItem('Notices', JSON.stringify(notes));
+        this.serverStorage.setItem('Notices', JSON.stringify(notes));
         console.log(notice);
     }
 
     onCreateNewNotice() {
         notes.push(new Notice())
+
+        localStorage.setItem('Notices', JSON.stringify(notes))
+        this.serverStorage.setItem('Notices', JSON.stringify(notes));
         this.render();
     }
 
@@ -152,6 +177,7 @@ export default class App {
         notes.splice(notes.indexOf(notice), 1)
 
         localStorage.setItem('Notices', JSON.stringify(notes))
+        this.serverStorage.setItem('Notices', JSON.stringify(notes))
         this.render();
     }
 };

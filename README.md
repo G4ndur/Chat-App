@@ -9,9 +9,9 @@ redis       63790
 
 
 ```bash
-$ ./.docker/build.sh
+$ sudo bash .docker/build.sh
 ```
 
 ```bash
-$ ./.docker/start.sh
+$ sudo bash .docker/start.sh
 ```
