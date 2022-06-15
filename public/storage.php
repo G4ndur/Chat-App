@@ -2,19 +2,27 @@
 
 declare(strict_types=1);
 
-$body = (array)json_decode((string)file_get_contents('php://input'));
-if (!count($body)) {
-    throw new RuntimeException('body could not empty');
+if (!isset($_GET['key'])) {
+    throw new RuntimeException('key musst be specified');
 }
 
-if (!isset($body['key'], $body['payload'])) {
-    throw new RuntimeException('key and payload musst be specified');
+if ($_GET['key'] === '') {
+    throw new RuntimeException('key could not be empty');
 }
 
-if ($body['key'] === '' || $body['payload'] === '') {
-    throw new RuntimeException('key and payload could not be empty');
+$filename = __DIR__ . '/../storage/' . strtolower($_GET['key']) . '.res';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $body = (string)file_get_contents('php://input');
+
+    if ($body === '') {
+        throw new RuntimeException('body could not be empty');
+    }
+
+    file_put_contents($filename, $body);
+
+    exit(0);
 }
 
-$filename = __DIR__ . '/../storage/' . strtolower($body['key']) . '.res';
-
-file_put_contents($filename, $body['payload']);
+header('Content-Type: application/json');
+echo file_get_contents($filename);

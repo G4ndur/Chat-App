@@ -28,18 +28,24 @@ class ServerStorage {
      * @param {string} payload
      */
     setItem(key, payload) {
-        return fetch('/storage.php', {
+        return fetch(`/storage.php?key=${key}`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({key: key, payload: payload})
+            body: payload
         });
     }
+
+    /**
+     * @param {string} key
+     */
+    getItem(key) {
+        return fetch(`/storage.php?key=${key}`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+    }
 }
-
-
-let notes = [];
 
 
 const template = `
@@ -116,6 +122,11 @@ export default class App {
     serverStorage = new ServerStorage();
 
     /**
+     * @type {Notice[]}
+     */
+    notes = [];
+
+    /**
      * @param {HTMLElement} container
      */
     constructor(container) {
@@ -131,11 +142,10 @@ export default class App {
         const noticesContainer = this.container.querySelector('.notices');
         noticesContainer.innerHTML = '';
 
-        notes.forEach(notice => {
+        this.notes.forEach(notice => {
             const div = document.createElement('div')
             div.innerHTML = NoticeTemplate(notice);
             noticesContainer.appendChild(div);
-
 
             div.querySelector('input').oninput = e => this.onChangeNoticeTitle(e, notice);
             div.querySelector('.delete').addEventListener('click', () => this.onDeleteNotice(notice))
@@ -143,14 +153,20 @@ export default class App {
     }
 
     run() {
+        /*
         const json = localStorage.getItem('Notices');
 
-        notes = [];
         if (json) {
-            notes = JSON.parse(json) || [];
+            this.notes = JSON.parse(json) || [];
         }
 
-        this.render();
+         */
+
+        this.serverStorage.getItem('Notices')
+            .then(response => response.json())
+            .then(notes => this.notes = notes)
+            .then(() => console.log(this.notes))
+            .then(() => this.render());
     }
 
     /**
@@ -160,24 +176,24 @@ export default class App {
     onChangeNoticeTitle(e, notice) {
         notice.title = e.target.value.trim();
         notice.updatedAt = new Date();
-        localStorage.setItem('Notices', JSON.stringify(notes));
-        this.serverStorage.setItem('Notices', JSON.stringify(notes));
+        // localStorage.setItem('Notices', JSON.stringify(this.notes));
+        this.serverStorage.setItem('Notices', JSON.stringify(this.notes));
         console.log(notice);
     }
 
     onCreateNewNotice() {
-        notes.push(new Notice())
+        this.notes.push(new Notice())
 
-        localStorage.setItem('Notices', JSON.stringify(notes))
-        this.serverStorage.setItem('Notices', JSON.stringify(notes));
+        // localStorage.setItem('Notices', JSON.stringify(this.notes))
+        this.serverStorage.setItem('Notices', JSON.stringify(this.notes));
         this.render();
     }
 
     onDeleteNotice(notice) {
-        notes.splice(notes.indexOf(notice), 1)
+        this.notes.splice(this.notes.indexOf(notice), 1);
 
-        localStorage.setItem('Notices', JSON.stringify(notes))
-        this.serverStorage.setItem('Notices', JSON.stringify(notes))
+        //localStorage.setItem('Notices', JSON.stringify(this.notes))
+        this.serverStorage.setItem('Notices', JSON.stringify(this.notes));
         this.render();
     }
 };
