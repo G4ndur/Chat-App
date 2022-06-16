@@ -23,4 +23,12 @@ final class Request
     {
         return $_GET[$key] ?? $default;
     }
+
+    /**
+     * @return string
+     */
+    public function getBody(): string
+    {
+        return (string)file_get_contents('php://input');
+    }
 }

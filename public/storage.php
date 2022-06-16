@@ -4,9 +4,13 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../source/Storage.php';
 require_once __DIR__ . '/../source/Request.php';
+require_once __DIR__ . '/../source/Response.php';
+require_once __DIR__ . '/../source/Responder.php';
 
 
 $request = new Request();
+$response = new Response();
+
 $serverStorage = new Storage(__DIR__ . '/../storage/');
 $key = $request->getQueryParameter('key');
 
@@ -19,16 +23,18 @@ if ($key === '') {
 }
 
 if ($request->getMethod() === Request::METHOD_POST) {
-    $payload = (string)file_get_contents('php://input');
 
-    if ($payload === '') {
+    $body = $request->getBody();
+    if ($body === '') {
         throw new RuntimeException('body could not be empty');
     }
 
-    $serverStorage->save($_GET['key'], $payload);
+    $serverStorage->save($key, $body);
 
-    exit(0);
+    Responder::respond($response);
 }
 
-header('Content-Type: application/json');
-echo $serverStorage->fetch($_GET['key']);
+$response->withHeader('Content-Type', 'application/json');
+$response->withBody($serverStorage->fetch($key));
+Responder::respond($response);
+
