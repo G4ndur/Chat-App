@@ -3,31 +3,32 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/../source/Storage.php';
-$serverStorage = new Storage(__DIR__ . '/../storage/');
+require_once __DIR__ . '/../source/Request.php';
 
-if (!isset($_GET['key'])) {
+
+$request = new Request();
+$serverStorage = new Storage(__DIR__ . '/../storage/');
+$key = $request->getQueryParameter('key');
+
+if ($key === null) {
     throw new RuntimeException('key musst be specified');
 }
 
-if ($_GET['key'] === '') {
+if ($key === '') {
     throw new RuntimeException('key could not be empty');
 }
 
-//$filename = __DIR__ . '/../storage/' . strtolower($_GET['key']) . '.res';
-
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+if ($request->getMethod() === Request::METHOD_POST) {
     $payload = (string)file_get_contents('php://input');
 
     if ($payload === '') {
         throw new RuntimeException('body could not be empty');
     }
 
-    //file_put_contents($filename, $body);
-
-
-    $serverStorage->save($_GET['key'],$payload);
+    $serverStorage->save($_GET['key'], $payload);
 
     exit(0);
 }
+
 header('Content-Type: application/json');
 echo $serverStorage->fetch($_GET['key']);

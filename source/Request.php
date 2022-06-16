@@ -2,23 +2,25 @@
 
 declare(strict_types=1);
 
-/*
-  1. getMethod():string
-  2. getQuery():array
- */
-
-
-class Request
-
-
+final class Request
 {
-    function getMethod(): string
+    public const METHOD_POST = 'POST';
+
+    /**
+     * @return string|null
+     */
+    public function getMethod(): ?string
     {
-        return $_SERVER['REQUEST_METHOD'];
+        return $_SERVER['REQUEST_METHOD'] ?? null;
     }
 
-    function getQuery(): array
+    /**
+     * @param string $key
+     * @param string|null $default
+     * @return string|null
+     */
+    public function getQueryParameter(string $key, ?string $default = null): ?string
     {
-        return $_GET['key'];
+        return $_GET[$key] ?? $default;
     }
 }
