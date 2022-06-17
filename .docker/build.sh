@@ -10,4 +10,4 @@ fi
 
 echo  "using $DOCKER"
 
-$DOCKER build -t ${DOCKER_IMAGE_TAG} "${PATH}"
+DOCKER_BUILDKIT=0 $DOCKER build -t ${DOCKER_IMAGE_TAG} "${PATH}"
