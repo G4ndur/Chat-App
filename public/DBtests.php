@@ -1,4 +1,4 @@
 <?php
-$db = new PDO('jdbc:mariadb://localhost:33060;dbname=Notices', 'root', 'root');
+$db = new PDO('mysql:dbname=Notices;host=localhost;port=3306', 'root', 'root');
 var_dump($db);
 ?>
