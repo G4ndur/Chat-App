@@ -1,7 +1,0 @@
-create table Notices
-(
-    title     linestring null,
-    createdAt datetime   null,
-    updatedAt datetime   null
-);
-

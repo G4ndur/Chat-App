@@ -1,17 +1,18 @@
 <?php
-declare(strict_types = 1);
+declare(strict_types=1);
+
 class DBStorage
 {
 
-    /** @var string */
-    private $DB;
+    /** @var PDO */
+    private $connection;
 
     /**
-     * @param string $DB
+     * @param PDO $connection
      */
-    public function __construct(string $DB)
+    public function __construct(PDO $connection)
     {
-        $this->DB = $DB;
+        $this->connection = $connection;
     }
 
     /**
@@ -21,9 +22,18 @@ class DBStorage
      */
     public function save(string $key, string $payload): void
     {
-        $filename = $this->storagePath . strtolower($key) . '.res';
+        $statement = $this->connection->prepare(
+            "INSERT INTO notices(`key`, payload, created_at)
+                    VALUES (:key, :payload, NOW())
+                    ON DUPLICATE KEY UPDATE
+                        payload = VALUES(payload),
+                        updated_at = NOW()");
 
-        file_put_contents($filename, $payload);
+        $success = $statement->execute(['key' => strtolower($key), 'payload' => $payload]);
+
+        if (!$success) {
+            throw new RuntimeException('payload could not be saved');
+        }
     }
 
     /**
@@ -32,8 +42,19 @@ class DBStorage
      */
     public function fetch(string $key): string
     {
+        $statement = $this->connection->prepare(
+            "SELECT payload
+                    FROM notices
+                    WHERE `key` = :key
+                    LIMIT 1");
 
-        $filename = $this->storagePath . strtolower($key) . '.res';
-        return file_get_contents($filename);
+        $statement->execute(['key' => strtolower($key)]);
+
+        $payload = $statement->fetchColumn();
+        if ($payload === false) {
+            return '';
+        }
+
+        return (string)$payload;
     }
 }

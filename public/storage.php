@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+
+require_once __DIR__ . '/../source/DBStorage.php';
 require_once __DIR__ . '/../source/Storage.php';
 require_once __DIR__ . '/../source/Request.php';
 require_once __DIR__ . '/../source/Response.php';
@@ -12,6 +14,9 @@ $request = new Request();
 $response = new Response();
 
 $serverStorage = new Storage(__DIR__ . '/../storage/');
+$dbConnection = new PDO('mysql:dbname=notice-app;host=localhost;port=3306', 'root', 'root');
+
+$serverStorage = new DBStorage($dbConnection);
 $key = $request->getQueryParameter('key');
 
 if ($key === null) {
