@@ -1,44 +1,30 @@
+import Message from "./message.js";
+import {inactiveContact} from "./template.js";
+
 class User {
+    /**
+     * @type {number}
+     */
+    id;
+
     /**
      * @type {string}
      */
     name;
+
     /**
      * @param {string} name
      */
-    constructor(name = 'Test') {
+    constructor(name) {
         this.name = name;
+
+        this.id = ++User.squence;
     }
 }
 
-class Message {
-    /**
-     * @type {string}
-     */
-    content;
-    /**
-     *
-     */
-    timestamp;
-}
+User.squence = 0;
 
 
-
-
-
-//Inaktiver Kontakt
-/**
- *
- * @param {User} user
- * @constructor
- */
-const inactiveContact = user => {
-    return `
-    <div class="about">
-        <div class="name">${user.name}</div>
-    </div>
-`
-};
 //Aktiver Kontakt
 /**
  *
@@ -54,26 +40,38 @@ const activeContact = user => {
 `
 };
 //Eigene gesendete Nachricht
-const messageSent =`
-<li class="clearfix">
+/**
+ *
+ * @param {Message} message
+ * @constructor
+ */
+const messageSent = message => {
+    return `
     <div style="text-align:right" class="message-data text-align">
-        <span class="message-data-time"></span>
+        <span class="message-data-time">${message.sentAt}</span>
     </div>
-    <div class="message my-message float-right"></div>
-</li>
+    <div class="message my-message float-right">${message.content}</div>
 `
+};
 //Erhaltene Nachricht
-const messageReceived = `
+/**
+ *
+ * @param {Message} message
+ * @constructor
+ */
+const messageReceived = message => {
+    return`
 <li class="clearfix">
     <div class="message-data">
-        <span class="message-data-time"></span>
+        <span class="message-data-time">${message.sentAt}</span>
     </div>
-    <div class="message other-message"></div>
+    <div class="message other-message">${message.content}</div>
 </li>
 `
+}
 // Alles nicht-dynamische
 const body = `
- <div style="height: 40rem" class=" container">
+ <div  class=" container">
      <div class="row clearfix">
          <div class=" col-lg-12">
              <div style="height: 40rem" class="card chat-app">
@@ -107,7 +105,7 @@ const body = `
 
                     <!-- div für den anfang der Chat historie -->
                      <div style="height: 33rem" class="chat-history">
-                         <ul class="m-b-0">
+                         <ul class="m-b-0" id="chat">
 
                              
                          </ul>
@@ -133,15 +131,37 @@ export default class App {
      * @type {HTMLElement}
      */
     container;
+
+    /**
+     * @type {Number}
+     */
+    activeID;
+    /**
+     * @type {User}
+     */
+    currentUser = new User('Max Mustermann');
+
+
     /**
      * @type {User[]}
      */
-    users = [];
+    users = [
+        this.currentUser,
+        new User('Frank Mustermann'),
+        new User('Karl Schreiber'),
+    ];
+
     /**
      *
      * @type {Message[]}
      */
-    messages = [];
+    messages = [
+        new Message(1, 2, 'Hallo'),
+        new Message(2, 1, 'Läuft...'),
+        new Message(3, 1, 'Läuft...')
+    ];
+
+
     /**
      * @param {HTMLElement} container
      */
@@ -152,27 +172,58 @@ export default class App {
 
         container.querySelector('.new')
             ?.addEventListener('click', this.showPrompt.bind(this));
+        container.querySelector('.form-control').oninput = e => this.onInput(e)
+        container.querySelector('.fa-send').addEventListener('click', this.onSend)
+
+        this.render();
     }
 
     render() {
 
 
-        const userList = this.container.querySelector('.chat-list');
-       userList.innerHTML = '';
 
-        this.users.forEach(User => {
+        const userList = this.container.querySelector('.chat-list');
+        userList.innerHTML = '';
+
+        this.users.forEach(user => {
+
             const userElement = document.createElement('li');
             userElement.classList.add('clearfix');
-            userElement.classList.add(User.name);
-            userElement.innerHTML = inactiveContact(User);
-            userElement.addEventListener('click',() => this.onInactiveUserClick(User))
+            userElement.setAttribute('data-user-id', `${user.id}`)
+            userElement.innerHTML = inactiveContact(user);
+            userElement.addEventListener('click', () => this.onInactiveUserClick(user))
             userList.appendChild(userElement);
-                            });
-            };
+        });
+
+    };
+
+    messageRender() {
+        const currentID = this.currentUser.id
+        const messageList = this.container.querySelector('#chat')
+        messageList.innerHTML = '';
+
+        this.messages.forEach(message => {
+
+            if (message.senderId === currentID && message.receiverId === this.activeID ){
+                const sentMessage = document.createElement('li')
+                sentMessage.classList.add('clearfix');
+                sentMessage.innerHTML = messageSent(message);
+                messageList.appendChild(sentMessage)
+            }
+            else if (message.senderId === this.activeID && message.receiverId === currentID){
+                const sentMessage = document.createElement('li')
+                sentMessage.classList.add('clearfix');
+                sentMessage.innerHTML = messageReceived(message);
+                messageList.appendChild(sentMessage)
+            }
+        })
+
+    }
 
     showPrompt() {
-        let inputName = prompt('Please enter your name','');
+        let inputName = prompt('Please enter your name', '');
         if (inputName != null) {
+            //UMBEDINGT NOCH EINEN DUPLICATE FILTER EINBAUEN
             // if (!this.users.includes) {
             //
             //     alert('User already exists!')
@@ -182,16 +233,38 @@ export default class App {
         }
     };
 
-    onInactiveUserClick(User) {
+    /**
+     * @param {User} user
+     */
+    onInactiveUserClick(user) {
         const activeUser = document.querySelector('.active')
         if (activeUser != null) {
             activeUser.classList.remove('active')
         }
-const selector = '.' + User.name
-const userElement = document.querySelector(selector)
+        const userElement = document.querySelector(`li[data-user-id="${user.id}"]`)
         userElement.classList.add('active')
+        const about = document.querySelector('.m-b-0')
+        about.innerHTML = user.name;
+        this.activeID = user.id
+        this.messageRender()
+
     }
 
+    /**
+     *
+     * @param {Event} e
+     */
+    onInput(e,) {
+        const messageInput = e.target.value.trim();
+        console.log(messageInput)
+        return messageInput
+    }
+
+    onSend(messageInput) {
+        const messageHistory = this.container.querySelector('.m-b-0')
+        messageHistory.appendChild(messageSent);
+
+    }
 };
 
 
