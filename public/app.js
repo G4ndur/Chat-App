@@ -94,7 +94,7 @@ const body = `
 
                                  <!-- Name des Chatpartners -->
                                  <div class="chat-about">
-                                     <h6 class="m-b-0"></h6>
+                                     <h6 class="m-b-0">Select a Contact</h6>
                                  </div>
 
                              </div>
@@ -104,7 +104,7 @@ const body = `
 
 
                     <!-- div für den anfang der Chat historie -->
-                     <div style="height: 33rem" class="chat-history">
+                     <div style="height: 32rem" class="chat-history">
                          <ul class="m-b-0" id="chat">
 
                              
@@ -160,6 +160,10 @@ export default class App {
         new Message(2, 1, 'Läuft...'),
         new Message(3, 1, 'Läuft...')
     ];
+    /**
+     * @type {string}
+     */
+    messageInput;
 
 
     /**
@@ -173,8 +177,7 @@ export default class App {
         container.querySelector('.new')
             ?.addEventListener('click', this.showPrompt.bind(this));
         container.querySelector('.form-control').oninput = e => this.onInput(e)
-        container.querySelector('.fa-send').addEventListener('click', this.onSend)
-
+        container.querySelector('.fa-send').addEventListener('click', this.onSend.bind(this))
         this.render();
     }
 
@@ -198,9 +201,9 @@ export default class App {
     };
 
     messageRender() {
-        const currentID = this.currentUser.id
         const messageList = this.container.querySelector('#chat')
         messageList.innerHTML = '';
+        const currentID = this.currentUser.id
 
         this.messages.forEach(message => {
 
@@ -255,14 +258,15 @@ export default class App {
      * @param {Event} e
      */
     onInput(e,) {
-        const messageInput = e.target.value.trim();
-        console.log(messageInput)
-        return messageInput
+        this.messageInput = e.target.value.trim();
     }
 
-    onSend(messageInput) {
-        const messageHistory = this.container.querySelector('.m-b-0')
-        messageHistory.appendChild(messageSent);
+    /**
+     *
+     */
+    onSend() {
+        this.messages.push(new Message(this.currentUser.id,this.activeID,this.messageInput));
+        this.messageRender()
 
     }
 };
