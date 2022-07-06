@@ -206,12 +206,12 @@ body{
     font-size: 0;
     content: " ";
     clear: both;
-    height: 0
+    height: 100%
 }
 
 @media only screen and (max-width: 767px) {
     .chat-app .people-list {
-        height: 465px;
+        height: 100%;
         width: 100%;
         overflow-x: auto;
         background: #fff;
