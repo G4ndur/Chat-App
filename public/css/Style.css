@@ -253,4 +253,7 @@ body{
         height: calc(100vh - 350px);
         overflow-x: auto
     }
+    .centering{
+        text-align: center;
+    }
 }

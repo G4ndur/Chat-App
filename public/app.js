@@ -79,7 +79,7 @@ const body = `
                  <!-- Anfang der Kontaktliste -->
 
                  <div id="plist" class="people-list">
-                 <div><button class="btn new">New User</button></div>
+                 <div><button class="btn new">New User</button><button class="btn change">Change User</button></div>
                      <ul class="list-unstyled chat-list mt-2 mb-0">
                       
                      </ul>
@@ -125,6 +125,14 @@ const body = `
      </div>
  </div>
 `;
+const changeUser = `
+                 <div id="plist" class="people-list" style="text-align: center">
+                 <div><button class="btn new">New User</button><button class="btn cancel">back</button></div>
+                     <ul class="list-unstyled chat-list mt-2 mb-0">
+                      
+                     </ul>
+                 </div>
+`
 
 export default class App {
     /**
@@ -136,17 +144,17 @@ export default class App {
      * @type {Number}
      */
     activeID;
-    /**
-     * @type {User}
-     */
-    currentUser = new User('Max Mustermann');
+    // /**
+    //  * @type {User}
+    //  */
+    // currentUser = new User('Max Mustermann');
 
 
     /**
      * @type {User[]}
      */
     users = [
-        this.currentUser,
+        new User('Max Mustermann'),
         new User('Frank Mustermann'),
         new User('Karl Schreiber'),
     ];
@@ -165,7 +173,10 @@ export default class App {
      */
     messageInput;
 
-
+    /**
+     * @type {number}
+     */
+    currentID = 1;
     /**
      * @param {HTMLElement} container
      */
@@ -174,16 +185,15 @@ export default class App {
         container.innerHTML = body;
         this.container = container;
 
-        container.querySelector('.new')
-            ?.addEventListener('click', this.showPrompt.bind(this));
-        container.querySelector('.form-control').oninput = e => this.onInput(e)
-        container.querySelector('.fa-send').addEventListener('click', this.onSend.bind(this))
         this.render();
     }
 
     render() {
-
-
+        this.container.querySelector('.new')
+            ?.addEventListener('click', this.showPrompt.bind(this));
+        this.container.querySelector('.form-control').oninput = e => this.onInput(e)
+        this.container.querySelector('.fa-send').addEventListener('click', this.onSend.bind(this))
+        this.container.querySelector('.change').addEventListener('click', this.onChangeUserBtn.bind(this))
 
         const userList = this.container.querySelector('.chat-list');
         userList.innerHTML = '';
@@ -200,20 +210,21 @@ export default class App {
 
     };
 
+
+
     messageRender() {
         const messageList = this.container.querySelector('#chat')
         messageList.innerHTML = '';
-        const currentID = this.currentUser.id
 
         this.messages.forEach(message => {
 
-            if (message.senderId === currentID && message.receiverId === this.activeID ){
+            if (message.senderId === this.currentID && message.receiverId === this.activeID ){
                 const sentMessage = document.createElement('li')
                 sentMessage.classList.add('clearfix');
                 sentMessage.innerHTML = messageSent(message);
                 messageList.appendChild(sentMessage)
             }
-            else if (message.senderId === this.activeID && message.receiverId === currentID){
+            else if (message.senderId === this.activeID && message.receiverId === this.currentID){
                 const sentMessage = document.createElement('li')
                 sentMessage.classList.add('clearfix');
                 sentMessage.innerHTML = messageReceived(message);
@@ -265,9 +276,47 @@ export default class App {
      *
      */
     onSend() {
-        this.messages.push(new Message(this.currentUser.id,this.activeID,this.messageInput));
+        this.messages.push(new Message(this.currentID,this.activeID,this.messageInput));
         this.messageRender()
 
+    }
+
+    onCancel() {
+
+        this.container.innerHTML = body;
+        this.render()
+    }
+
+    onChangeUserBtn() {
+        this.container.innerHTML = changeUser
+        this.container.querySelector('.cancel').addEventListener('click', this.onCancel.bind(this))
+        this.changeUserRender()
+    }
+    changeUserRender() {
+
+
+
+        const userList = this.container.querySelector('.chat-list');
+        userList.innerHTML = '';
+
+        this.users.forEach(user => {
+
+            const userElement = document.createElement('li');
+            userElement.classList.add('clearfix');
+            userElement.setAttribute('data-user-id', `${user.id}`)
+            userElement.innerHTML = inactiveContact(user);
+            userElement.addEventListener('click', () => this.onChangeUser(user))
+            userList.appendChild(userElement);
+        });
+
+    };
+
+    /**
+     *
+     * @param {User} user
+     */
+    onChangeUser(user) {
+        this.currentID = user.id
     }
 };
 
