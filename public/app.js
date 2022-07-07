@@ -1,26 +1,8 @@
 import Message from "./message.js";
+import User from "./user.js";
 import {inactiveContact, inactiveContactMod} from "./template.js";
+// import Contacts from "./contacts.js";
 
-class User {
-    /**
-     * @type {number}
-     */
-    id;
-
-    /**
-     * @type {string}
-     */
-    name;
-
-    /**
-     * @param {string} name
-     */
-    constructor(name) {
-        this.name = name;
-
-        this.id = ++User.squence;
-    }
-};
 //Eigene gesendete Nachricht
 /**
  *
@@ -109,12 +91,13 @@ const body = `
 `;
 const changeUser = `
                  <div id="plist" class="people-list" style="text-align: center">
-                 <div><button class="btn new">New User</button><button class="btn cancel">Back</button></div>
+                 <div><button class="btn new">New User</button><button class="btn cancel">Back</button><button class="btn Msgdel">Delete all Messages</button></div>
                      <ul class="list-unstyled chat-list mt-2 mb-0">
                       
                      </ul>
                  </div>
 `
+
 
 export default class App {
     /**
@@ -161,19 +144,24 @@ export default class App {
         container.innerHTML = body;
         this.container = container;
 
+
     }
     run(){
-        const json = localStorage.getItem('Users');
-
-        if (json) {
+       const  json = localStorage.getItem('users')
+        if (json){
             this.users = JSON.parse(json) || [];
         }
-        const json2 = localStorage.getItem('Messages');
+        const json0 = localStorage.getItem('sequence')
+        if (json0){
+            User.squence = JSON.parse(json0)
+        }
+        const json2 = localStorage.getItem('messages');
 
         if (json2) {
             this.messages = JSON.parse(json2) || [];
         }
-        User.squence = this.users.length
+
+
         this.onChangeUserBtn()
     }
     render() {
@@ -226,14 +214,20 @@ export default class App {
     showPrompt() {
         let inputName = prompt('Please enter your name', '');
         if (inputName != null) {
-            //UMBEDINGT NOCH EINEN DUPLICATE FILTER EINBAUEN
-            // if (!this.users.includes) {
-            //
-            //     alert('User already exists!')
-            // }
             this.users.push(new User(inputName));
-            localStorage.setItem('Users', JSON.stringify(this.users))
+            localStorage.setItem('users', JSON.stringify(this.users))
+            localStorage.setItem('sequence', JSON.stringify(User.squence))
             this.render()
+        }
+    };
+
+    showPromptMod() {
+        let inputName = prompt('Please enter your name', '');
+        if (inputName != null) {
+            this.users.push(new User(inputName));
+            localStorage.setItem('users', JSON.stringify(this.users))
+            localStorage.setItem('sequence', JSON.stringify(User.squence))
+            this.changeUserRender()
         }
     };
 
@@ -267,7 +261,7 @@ export default class App {
      */
     onSend() {
         this.messages.push(new Message(this.currentID,this.activeID,this.messageInput));
-        localStorage.setItem('Messages', JSON.stringify(this.messages))
+        localStorage.setItem('messages', JSON.stringify(this.messages))
         this.messageRender()
 
     }
@@ -282,8 +276,9 @@ export default class App {
         this.container.innerHTML = changeUser
 
         this.container.querySelector('.new')
-            ?.addEventListener('click', this.showPrompt.bind(this));
+            ?.addEventListener('click', this.showPromptMod.bind(this));
         this.container.querySelector('.cancel').addEventListener('click', this.onCancel.bind(this))
+        this.container.querySelector('.Msgdel').addEventListener('click', this.onDeleteMessages)
         this.changeUserRender()
     }
     changeUserRender() {
@@ -317,13 +312,18 @@ export default class App {
 
     /**
      *
-     * @param {User}user
+     * @param {User} user
      */
     onDeleteUser(user) {
-        this.users.splice(this.users.indexOf(User), 1);
-
-        localStorage.setItem('Users', JSON.stringify(this.users))
+        this.users.splice(this.users.indexOf(user), 1);
+        localStorage.setItem('users', JSON.stringify(this.users))
+        localStorage.setItem('sequence', JSON.stringify(User.squence))
         this.changeUserRender();
+    }
+    onDeleteMessages(){
+        this.messages = [ ];
+        localStorage.setItem('messages', JSON.stringify(this.messages))
+        alert('All messages have been deleted!')
     }
 };
 
