@@ -1,5 +1,5 @@
 import Message from "./message.js";
-import {inactiveContact} from "./template.js";
+import {inactiveContact, inactiveContactMod} from "./template.js";
 
 class User {
     /**
@@ -20,24 +20,6 @@ class User {
 
         this.id = ++User.squence;
     }
-}
-
-User.squence = 0;
-
-
-//Aktiver Kontakt
-/**
- *
- * @param {User} user
- * @constructor
- */
-const activeContact = user => {
-    return `
-<li class="clearfix active">
-    <div class="about">
-        <div class="name">${user.name}</div>
-    </div>
-`
 };
 //Eigene gesendete Nachricht
 /**
@@ -127,7 +109,7 @@ const body = `
 `;
 const changeUser = `
                  <div id="plist" class="people-list" style="text-align: center">
-                 <div><button class="btn new">New User</button><button class="btn cancel">back</button></div>
+                 <div><button class="btn new">New User</button><button class="btn cancel">Back</button></div>
                      <ul class="list-unstyled chat-list mt-2 mb-0">
                       
                      </ul>
@@ -154,19 +136,13 @@ export default class App {
      * @type {User[]}
      */
     users = [
-        new User('Max Mustermann'),
-        new User('Frank Mustermann'),
-        new User('Karl Schreiber'),
-    ];
+            ];
 
     /**
      *
      * @type {Message[]}
      */
     messages = [
-        new Message(1, 2, 'Hallo'),
-        new Message(2, 1, 'Läuft...'),
-        new Message(3, 1, 'Läuft...')
     ];
     /**
      * @type {string}
@@ -185,9 +161,21 @@ export default class App {
         container.innerHTML = body;
         this.container = container;
 
-        this.render();
     }
+    run(){
+        const json = localStorage.getItem('Users');
 
+        if (json) {
+            this.users = JSON.parse(json) || [];
+        }
+        const json2 = localStorage.getItem('Messages');
+
+        if (json2) {
+            this.messages = JSON.parse(json2) || [];
+        }
+        User.squence = this.users.length
+        this.onChangeUserBtn()
+    }
     render() {
         this.container.querySelector('.new')
             ?.addEventListener('click', this.showPrompt.bind(this));
@@ -230,6 +218,7 @@ export default class App {
                 sentMessage.innerHTML = messageReceived(message);
                 messageList.appendChild(sentMessage)
             }
+            console.log(this.messages)
         })
 
     }
@@ -243,6 +232,7 @@ export default class App {
             //     alert('User already exists!')
             // }
             this.users.push(new User(inputName));
+            localStorage.setItem('Users', JSON.stringify(this.users))
             this.render()
         }
     };
@@ -277,6 +267,7 @@ export default class App {
      */
     onSend() {
         this.messages.push(new Message(this.currentID,this.activeID,this.messageInput));
+        localStorage.setItem('Messages', JSON.stringify(this.messages))
         this.messageRender()
 
     }
@@ -289,6 +280,9 @@ export default class App {
 
     onChangeUserBtn() {
         this.container.innerHTML = changeUser
+
+        this.container.querySelector('.new')
+            ?.addEventListener('click', this.showPrompt.bind(this));
         this.container.querySelector('.cancel').addEventListener('click', this.onCancel.bind(this))
         this.changeUserRender()
     }
@@ -301,11 +295,12 @@ export default class App {
 
         this.users.forEach(user => {
 
-            const userElement = document.createElement('li');
-            userElement.classList.add('clearfix');
+            const userElement = document.createElement('button');
+            userElement.classList.add('btn');
             userElement.setAttribute('data-user-id', `${user.id}`)
-            userElement.innerHTML = inactiveContact(user);
-            userElement.addEventListener('click', () => this.onChangeUser(user))
+            userElement.innerHTML = inactiveContactMod(user);
+            userElement.querySelector('.user').addEventListener('click', () => this.onChangeUser(user))
+            userElement.querySelector('.del').addEventListener('click',() => this.onDeleteUser(user) )
             userList.appendChild(userElement);
         });
 
@@ -317,6 +312,18 @@ export default class App {
      */
     onChangeUser(user) {
         this.currentID = user.id
+
+    }
+
+    /**
+     *
+     * @param {User}user
+     */
+    onDeleteUser(user) {
+        this.users.splice(this.users.indexOf(User), 1);
+
+        localStorage.setItem('Users', JSON.stringify(this.users))
+        this.changeUserRender();
     }
 };
 
