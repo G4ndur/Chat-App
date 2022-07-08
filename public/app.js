@@ -1,7 +1,7 @@
 import Message from "./message.js";
 import User from "./user.js";
 import {inactiveContact, inactiveContactMod} from "./template.js";
-// import Contacts from "./contacts.js";
+import LocaleContactsStore from "./contacts.js";
 
 //Eigene gesendete Nachricht
 /**
@@ -136,6 +136,14 @@ export default class App {
      * @type {number}
      */
     currentID = 1;
+
+    /**
+     *
+     * @type {LocaleContactsStore}
+     */
+    localContacts = new LocaleContactsStore()
+
+
     /**
      * @param {HTMLElement} container
      */
@@ -147,20 +155,24 @@ export default class App {
 
     }
     run(){
-       const  json = localStorage.getItem('users')
-        if (json){
-            this.users = JSON.parse(json) || [];
-        }
-        const json0 = localStorage.getItem('sequence')
-        if (json0){
-            User.squence = JSON.parse(json0)
-        }
+       // const  json = localStorage.getItem('users')
+       //  if (json){
+       //      this.users = JSON.parse(json) || [];
+       //  }
+       //  const json0 = localStorage.getItem('sequence')
+       //  if (json0){
+       //      User.sequence = JSON.parse(json0)
+       //  }
+        const load = this.localContacts.load()
+        User.sequence = load.sequence
+        this.users = load.users
+
+
         const json2 = localStorage.getItem('messages');
 
         if (json2) {
             this.messages = JSON.parse(json2) || [];
         }
-
 
         this.onChangeUserBtn()
     }
@@ -189,6 +201,11 @@ export default class App {
 
 
     messageRender() {
+        const json2 = localStorage.getItem('messages');
+
+        if (json2) {
+            this.messages = JSON.parse(json2) || [];
+        }
         const messageList = this.container.querySelector('#chat')
         messageList.innerHTML = '';
 
@@ -215,8 +232,9 @@ export default class App {
         let inputName = prompt('Please enter your name', '');
         if (inputName != null) {
             this.users.push(new User(inputName));
-            localStorage.setItem('users', JSON.stringify(this.users))
-            localStorage.setItem('sequence', JSON.stringify(User.squence))
+            // localStorage.setItem('users', JSON.stringify(this.users))
+            // localStorage.setItem('sequence', JSON.stringify(User.sequence))
+            this.localContacts.save(this.users, User.sequence)
             this.render()
         }
     };
@@ -225,8 +243,10 @@ export default class App {
         let inputName = prompt('Please enter your name', '');
         if (inputName != null) {
             this.users.push(new User(inputName));
-            localStorage.setItem('users', JSON.stringify(this.users))
-            localStorage.setItem('sequence', JSON.stringify(User.squence))
+            // localStorage.setItem('users', JSON.stringify(this.users))
+            // localStorage.setItem('sequence', JSON.stringify(User.sequence))
+            this.localContacts.save(this.users, User.sequence)
+
             this.changeUserRender()
         }
     };
@@ -306,6 +326,7 @@ export default class App {
      * @param {User} user
      */
     onChangeUser(user) {
+        alert('Current User has been changed to: ' + user.name)
         this.currentID = user.id
 
     }
@@ -316,8 +337,9 @@ export default class App {
      */
     onDeleteUser(user) {
         this.users.splice(this.users.indexOf(user), 1);
-        localStorage.setItem('users', JSON.stringify(this.users))
-        localStorage.setItem('sequence', JSON.stringify(User.squence))
+        // localStorage.setItem('users', JSON.stringify(this.users))
+        // localStorage.setItem('sequence', JSON.stringify(User.sequence))
+        this.localContacts.save(this.users, User.sequence)
         this.changeUserRender();
     }
     onDeleteMessages(){

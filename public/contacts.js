@@ -19,7 +19,7 @@ export default class LocaleContactsStore {
     }
 
     /**
-     * @returns {{sequence: number, users: {}[]}}
+     * @returns {{sequence: number, users: User[]}}
      */
     load() {
         const contacts = JSON.parse(localStorage.getItem('contacts') || '') || null;
