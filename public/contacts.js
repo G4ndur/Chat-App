@@ -1,13 +1,17 @@
 import User from "./user.js";
+import ServerStorage from "./serverStorage.js";
 
 export default class LocaleContactsStore {
+
 
     /**
      * @param {User[]} users
      * @param {number} lastUserSequence
+     * @param {ServerStorage} serverStorage
      */
-    save(users, lastUserSequence) {
-        localStorage.setItem('contacts', JSON.stringify({
+    save(users, lastUserSequence,serverStorage) {
+
+        serverStorage.setItem('contacts', JSON.stringify({
             sequence: lastUserSequence,
             users: users.map(user => {
                 return {
