@@ -1,39 +1,13 @@
 import Message from "./message.js";
 import User from "./user.js";
-import {inactiveContact, inactiveContactMod} from "./template.js";
-import LocaleContactsStore from "./contacts.js";
-import ServerStorage from "./serverStorage.js";
+import {inactiveContact, inactiveContactMod, messageReceived, messageSent} from "./template.js";
+import {ServerContactsStore, ServerMessageStore} from "./server_storages.js";
 
-//Eigene gesendete Nachricht
-/**
- *
- * @param {Message} message
- * @constructor
- */
-const messageSent = message => {
-    return `
-    <div style="text-align:right" class="message-data text-align">
-        <span class="message-data-time">${message.sentAt}</span>
-    </div>
-    <div class="message my-message float-right">${message.content}</div>
-`
-};
-//Erhaltene Nachricht
-/**
- *
- * @param {Message} message
- * @constructor
- */
-const messageReceived = message => {
-    return `
-<li class="clearfix">
-    <div class="message-data">
-        <span class="message-data-time">${message.sentAt}</span>
-    </div>
-    <div class="message other-message">${message.content}</div>
-</li>
-`
-}
+
+const contactStorage = new ServerContactsStore();
+const messageStorage = new ServerMessageStore();
+
+
 // Alles nicht-dynamische
 const body = `
  <div  class=" container">
@@ -92,12 +66,12 @@ const body = `
 `;
 const changeUser = `
                  <div id="plist" class="people-list" style="text-align: center">
-                 <div><button class="btn new">New User</button><button class="btn cancel">Back</button><button class="btn Msgdel">Delete all Messages</button></div>
+                 <div><button class="btn new">New User</button><button class="btn cancel">Chats</button><button class="btn Msgdel">Delete all Messages</button></div>
                      <ul class="list-unstyled chat-list mt-2 mb-0">
                       
                      </ul>
                  </div>
-`
+`;
 
 
 export default class App {
@@ -136,65 +110,45 @@ export default class App {
      */
     currentID = 1;
 
-    /**
-     * @type {ServerStorage}
-     */
-    serverStorage = new ServerStorage();
-
-    /**
-     *
-     * @type {LocaleContactsStore}
-     */
-    localContacts = new LocaleContactsStore()
-    load;
-
 
     /**
      * @param {HTMLElement} container
      */
 
     constructor(container) {
-        container.innerHTML = body;
         this.container = container;
-
-
     }
 
     run() {
-        // const load = this.localContacts.load()
-        // User.sequence = load.sequence
-        // this.users = load.users
-        //
+
         // this.serverStorage.getItem('contacts')
         //     .then(response => response.json())
-        //     .then(sequence => User.sequence = sequence)
-        //     .then(users => this.users = users)
+        //     .then(contacts => this.load = contacts)
+        //     .then(() => this.users = this.load.users)
+        //     .then(() => User.sequence = this.load.sequence)
+        //     .then(() => this.onChangeUserBtn())
 
-        this.serverStorage.getItem('contacts')
-            .then(response => response.json())
-            .then(contacts => this.load = contacts)
-            .then(() => this.users = this.load.users)
-            .then(() => User.sequence = this.load.sequence)
-            .then(() => this.onChangeUserBtn())
+        contactStorage.load()
+            .then(storedContacts => {
+                this.users = storedContacts.users;
+                User.sequence = storedContacts.sequence;
 
+            })
+            .then(() => this.renderChangeUserDialog());
 
-
-
-
-
-        this.serverStorage.getItem('messages')
-            .then(response => response.json())
-            .then(messages => this.messages = messages)
-
-        this.onChangeUserBtn()
+        messageStorage.load()
+            .then(storedMessages => {
+                this.messages = storedMessages.messages;
+                console.log(storedMessages.messages);
+            });
     }
 
     render() {
         this.container.querySelector('.new')
-            ?.addEventListener('click', this.showPrompt.bind(this));
-        this.container.querySelector('.form-control').oninput = e => this.onInput(e)
-        this.container.querySelector('.fa-send').addEventListener('click', this.onSend.bind(this))
-        this.container.querySelector('.change').addEventListener('click', this.onChangeUserBtn.bind(this))
+            ?.addEventListener('click', this.showChatPromptToAddNewUser.bind(this));
+        this.container.querySelector('.form-control').oninput = e => this.onInput(e);
+        this.container.querySelector('.fa-send').addEventListener('click', this.onSend.bind(this));
+        this.container.querySelector('.change').addEventListener('click', this.renderChangeUserDialog.bind(this));
 
         const userList = this.container.querySelector('.chat-list');
         userList.innerHTML = '';
@@ -203,9 +157,9 @@ export default class App {
 
             const userElement = document.createElement('li');
             userElement.classList.add('clearfix');
-            userElement.setAttribute('data-user-id', `${user.id}`)
+            userElement.setAttribute('data-user-id', `${user.id}`);
             userElement.innerHTML = inactiveContact(user);
-            userElement.addEventListener('click', () => this.onInactiveUserClick(user))
+            userElement.addEventListener('click', () => this.onInactiveUserClick(user));
             userList.appendChild(userElement);
         });
 
@@ -213,110 +167,102 @@ export default class App {
 
 
     messageRender() {
-        // const json2 = localStorage.getItem('messages');
-        //
-        // if (json2) {
-        //     this.messages = JSON.parse(json2) || [];
-        // }
-        const messageList = this.container.querySelector('#chat')
+
+        const messageList = this.container.querySelector('#chat');
         messageList.innerHTML = '';
+
+        console.log(this.messages);
 
         this.messages.forEach(message => {
 
             if (message.senderId === this.currentID && message.receiverId === this.activeID) {
-                const sentMessage = document.createElement('li')
+                const sentMessage = document.createElement('li');
                 sentMessage.classList.add('clearfix');
                 sentMessage.innerHTML = messageSent(message);
-                messageList.appendChild(sentMessage)
+                messageList.appendChild(sentMessage);
             } else if (message.senderId === this.activeID && message.receiverId === this.currentID) {
-                const sentMessage = document.createElement('li')
+                const sentMessage = document.createElement('li');
                 sentMessage.classList.add('clearfix');
                 sentMessage.innerHTML = messageReceived(message);
-                messageList.appendChild(sentMessage)
+                messageList.appendChild(sentMessage);
             }
-            console.log(this.messages)
-        })
+        });
 
     }
 
-    showPrompt() {
+    showChatPromptToAddNewUser() {
         let inputName = prompt('Please enter your name', '');
-        if (inputName != null) {
-            this.users.push(new User(inputName));
-            // localStorage.setItem('users', JSON.stringify(this.users))
-            // localStorage.setItem('sequence', JSON.stringify(User.sequence))
-            this.localContacts.save(this.users, User.sequence, this.serverStorage);
-            this.render()
+
+        if (!inputName) {
+            return;
         }
+
+        this.users.push(new User(inputName));
+        contactStorage.save(this.users, User.sequence);
+        this.render();
     };
 
-    showPromptMod() {
+    showModeratorPromptToAddNewUser() {
         let inputName = prompt('Please enter your name', '');
-        if (inputName != null) {
-            this.users.push(new User(inputName));
-            // localStorage.setItem('users', JSON.stringify(this.users))
-            // localStorage.setItem('sequence', JSON.stringify(User.sequence))
-            this.localContacts.save(this.users, User.sequence, this.serverStorage);
 
-            this.changeUserRender()
+        if (!inputName) {
+            return;
         }
+
+        this.users.push(new User(inputName));
+        contactStorage.save(this.users, User.sequence);
+
+        this.renderChangeUserList();
     };
 
     /**
      * @param {User} user
      */
     onInactiveUserClick(user) {
-        const activeUser = document.querySelector('.active')
-        if (activeUser != null) {
-            activeUser.classList.remove('active')
+        const activeUser = document.querySelector('.active');
+        if (activeUser) {
+            activeUser.classList.remove('active');
         }
-        const userElement = document.querySelector(`li[data-user-id="${user.id}"]`)
-        userElement.classList.add('active')
-        const about = document.querySelector('.m-b-0')
+        const userElement = document.querySelector(`li[data-user-id="${user.id}"]`);
+        userElement.classList.add('active');
+        const about = document.querySelector('.m-b-0');
         about.innerHTML = user.name;
-        this.activeID = user.id
-        this.messageRender()
-
+        this.activeID = user.id;
+        this.messageRender();
     }
 
     /**
-     *
      * @param {Event} e
      */
     onInput(e,) {
         this.messageInput = e.target.value.trim();
     }
 
-    /**
-     *
-     */
     onSend() {
-        console.log('hello')
+        console.log('hello');
         this.messages.push(new Message(this.currentID, this.activeID, this.messageInput));
-        this.serverStorage.setItem('messages', JSON.stringify(this.messages));
-        // localStorage.setItem('messages', JSON.stringify(this.messages))
-        this.messageRender()
+        messageStorage.save(this.messages);
+        this.messageRender();
 
     }
 
     onCancel() {
 
         this.container.innerHTML = body;
-        this.render()
+        this.render();
     }
 
-    onChangeUserBtn() {
-        this.container.innerHTML = changeUser
+    renderChangeUserDialog() {
+        this.container.innerHTML = changeUser;
 
         this.container.querySelector('.new')
-            ?.addEventListener('click', this.showPromptMod.bind(this));
-        this.container.querySelector('.cancel').addEventListener('click', this.onCancel.bind(this))
-        this.container.querySelector('.Msgdel').addEventListener('click', this.onDeleteMessages)
-        this.changeUserRender()
+            ?.addEventListener('click', this.showModeratorPromptToAddNewUser.bind(this));
+        this.container.querySelector('.cancel').addEventListener('click', this.onCancel.bind(this));
+        this.container.querySelector('.Msgdel').addEventListener('click', this.onDeleteMessages);
+        this.renderChangeUserList();
     }
 
-    changeUserRender() {
-
+    renderChangeUserList() {
 
         const userList = this.container.querySelector('.chat-list');
         userList.innerHTML = '';
@@ -325,41 +271,37 @@ export default class App {
 
             const userElement = document.createElement('button');
             userElement.classList.add('btn');
-            userElement.setAttribute('data-user-id', `${user.id}`)
+            userElement.setAttribute('data-user-id', `${user.id}`);
             userElement.innerHTML = inactiveContactMod(user);
-            userElement.querySelector('.user').addEventListener('click', () => this.onChangeUser(user))
-            userElement.querySelector('.del').addEventListener('click', () => this.onDeleteUser(user))
+            userElement.querySelector('.user').addEventListener('click', () => this.onChangeUser(user));
+            userElement.querySelector('.del').addEventListener('click', () => this.onDeleteUser(user));
             userList.appendChild(userElement);
         });
 
     };
 
     /**
-     *
      * @param {User} user
      */
     onChangeUser(user) {
-        alert('Current User has been changed to: ' + user.name)
-        this.currentID = user.id
+        alert('Current User has been changed to: ' + user.name);
+        this.currentID = user.id;
 
     }
 
     /**
-     *
      * @param {User} user
      */
     onDeleteUser(user) {
         this.users.splice(this.users.indexOf(user), 1);
-        // localStorage.setItem('users', JSON.stringify(this.users))
-        // localStorage.setItem('sequence', JSON.stringify(User.sequence))
-        this.localContacts.save(this.users, User.sequence, this.serverStorage)
-        this.changeUserRender();
+        contactStorage.save(this.users, User.sequence);
+        this.renderChangeUserList();
     }
 
     onDeleteMessages() {
         this.messages = [];
-        this.serverStorage.setItem('messages', JSON.stringify(this.messages));
-        alert('All messages have been deleted!')
+        messageStorage.save([]);
+        alert('All messages have been deleted!');
     }
 };
 

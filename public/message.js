@@ -5,9 +5,9 @@ export default class Message {
     content;
 
     /**
-     * @type {string}
+     * @type {Date|null}
      */
-    sentAt = new Date().toLocaleDateString('en-GB');
+    sentAt = null;
 
     /**
      * @type {number}
@@ -20,13 +20,14 @@ export default class Message {
     receiverId;
 
     /**
-     *
      * @param {number} senderId
+     * @param {Date|null} sentAt
      * @param {number} receiverId
      * @param {string} content
      */
-    constructor(senderId, receiverId, content) {
+    constructor(senderId, receiverId, content, sentAt = null) {
         this.content = content;
+        this.sentAt = sentAt || new Date();
         this.senderId = senderId;
         this.receiverId = receiverId;
     }
