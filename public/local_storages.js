@@ -6,6 +6,7 @@ export class LocaleContactsStore {
     /**
      * @param {User[]} users
      * @param {number} lastUserSequence
+     * @returns Promise<any>
      */
     async save(users, lastUserSequence) {
 

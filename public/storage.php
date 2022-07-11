@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-require_once __DIR__ . '/../source/Storage.php';
+require_once __DIR__ . '/../source/FileSystemStorage.php';
 require_once __DIR__ . '/../source/Request.php';
 require_once __DIR__ . '/../source/Response.php';
 require_once __DIR__ . '/../source/Responder.php';
@@ -11,7 +11,7 @@ $request = new Request();
 $response = new Response();
 
 $key = $request->getQueryParameter('key');
-$serverStorage = new Storage(__DIR__ . '/../storage/');
+$serverStorage = new FileSystemStorage(__DIR__ . '/../storage/');
 
 if ($key === null) {
     throw new RuntimeException('key musst be specified');

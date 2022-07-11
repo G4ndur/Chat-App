@@ -1,12 +1,12 @@
 <?php
 
-
 declare(strict_types=1);
 
-final class Storage
+final class FileSystemStorage
 {
     /** @var string */
     private $storagePath;
+
     /**
      * @param string $storagePath
      */
@@ -37,8 +37,12 @@ final class Storage
      */
     public function fetch(string $key): string
     {
-
         $filename = $this->storagePath . strtolower($key) . '.res';
+
+        if (!file_exists($filename)) {
+            return '{}';
+        }
+
         return file_get_contents($filename);
     }
 }

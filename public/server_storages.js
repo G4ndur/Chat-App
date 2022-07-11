@@ -9,9 +9,10 @@ export class ServerContactsStore {
     /**
      * @param {User[]} users
      * @param {number} lastUserSequence
+     * @returns Promise<any>
      */
     save(users, lastUserSequence) {
-        serverStorage.setItem('contacts', JSON.stringify({
+        return serverStorage.setItem('contacts', JSON.stringify({
             sequence: lastUserSequence,
             users: users.map(user => {
                 return {
@@ -23,11 +24,17 @@ export class ServerContactsStore {
     }
 
     /**
-     * @returns {Promise<any>}
+     * @returns Promise<any>
      */
     load() {
         return serverStorage.getItem('contacts')
             .then(respond => respond.json())
+            .then(payload => {
+                payload.users = payload.users || [];
+                payload.sequence = payload.sequence || User.sequence;
+
+                return payload;
+            })
             .then(contacts => {
                 contacts.users = contacts.users.map(record => new User(record.name, record.id));
                 return contacts;
@@ -43,7 +50,7 @@ export class ServerMessageStore {
      * @param {Message[]} messages
      */
     save(messages) {
-        serverStorage.setItem('messages', JSON.stringify({
+        return serverStorage.setItem('messages', JSON.stringify({
             messages: messages.map(message => {
                 return {
                     senderId: message.senderId,
@@ -56,17 +63,24 @@ export class ServerMessageStore {
     }
 
     /**
-     *
-     * @returns {Promise<any>}
+     * @returns Promise<any>
      */
     load() {
         return serverStorage.getItem('messages')
             .then(respond => respond.json())
             .then(payload => {
-                payload.messages = payload.messages.map(record => new Message(record.senderId,
-                    record.receiverId,
-                    record.content,
-                    new Date(record.sentAt)));
+                payload.messages = payload.messages || [];
+
+                return payload;
+            })
+            .then(payload => {
+                payload.messages = payload.messages.map(record => {
+                    return new Message(record.senderId,
+                        record.receiverId,
+                        record.content,
+                        new Date(record.sentAt)
+                    );
+                });
                 console.log(payload.messages);
                 return payload;
             });
