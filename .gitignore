@@ -1,4 +1,4 @@
 .idea
 !storage/.gitignore
-!storagecontacts.res
-!storagemessages.res
+storagecontacts.res
+storagemessages.res
