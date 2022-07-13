@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-
+require_once __DIR__ . '/../source/StoresContacts.php';
 class DatabaseContactStorage implements StoresContacts
 {
     /**
@@ -21,15 +21,13 @@ class DatabaseContactStorage implements StoresContacts
      * @param string $name
      * @return void
      */
- public function save(string $name): void
+ public function save(string $payload): void
  {
      $statement = $this->connection->prepare(
          "INSERT INTO contacts(name)
-                    VALUES (:name)
-                    ON DUPLICATE KEY UPDATE
-                        name = VALUES(name)");
+                    VALUES (:name)");
 
-     $success = $statement->execute(['name' => $name]);
+     $success = $statement->execute(['name' => $payload]);
 
      if (!$success) {
          throw new RuntimeException('payload could not be saved');
@@ -38,6 +36,18 @@ class DatabaseContactStorage implements StoresContacts
 
  public function fetch(): string
  {
+//     $statement = $this->connection->prepare(
+//         "SELECT name
+//                    FROM contacts
+//                    LIMIT 1");
+//
+//     $statement->execute();
+//
+//     $payload = $statement->fetchColumn();
+//     if ($payload === false) {
+//         return '';
+//     }
 
+     return'{}';
  }
 }
