@@ -6,32 +6,17 @@ require_once __DIR__ . '/../source/FileSystemStorage.php';
 require_once __DIR__ . '/../source/Request.php';
 require_once __DIR__ . '/../source/Response.php';
 require_once __DIR__ . '/../source/Responder.php';
+require_once __DIR__ . '/../source/StorageRequestHandler.php';
+require_once __DIR__ . '/../source/FileSystemContactStorage.php';
+require_once __DIR__ . '/../source/FileSystemMessageStorage.php';
 
-$request = new Request();
-$response = new Response();
 
-$key = $request->getQueryParameter('key');
-$serverStorage = new FileSystemStorage(__DIR__ . '/../storage/');
 
-if ($key === null) {
-    throw new RuntimeException('key musst be specified');
-}
+$path = __DIR__.'/../storage';
 
-if ($key === '') {
-    throw new RuntimeException('key could not be empty');
-}
+$requestHandler = new StorageRequestHandler(
+  new FileSystemContactStorage($path),
+  new FileSystemMessageStorage($path)
+);
 
-if ($request->getMethod() === Request::METHOD_POST) {
-
-    $body = $request->getBody();
-    if ($body === '') {
-        throw new RuntimeException('body could not be empty');
-    }
-    $serverStorage->save($key, $body);
-
-    Responder::respond($response);
-}
-
-$response->withHeader('Content-Type', 'application/json');
-$response->withBody($serverStorage->fetch($key));
-Responder::respond($response);
+Responder::respond($requestHandler->handle(new Request()));
