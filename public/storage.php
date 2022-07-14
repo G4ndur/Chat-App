@@ -13,7 +13,7 @@ require_once __DIR__ . '/../source/DatabaseContactStorage.php';
 
 
 $path = __DIR__.'/../storage';
-$connection = new PDO('mysql:dbname=chat-app;host=localhost;port=3306', 'root', 'root');
+// $connection = new PDO('mysql:dbname=chat-app;host=localhost;port=3306', 'root', 'root');
 
 
 $requestHandler = new StorageRequestHandler(
