@@ -1,9 +1,9 @@
 create table messages
 (
-    payload   varchar(255) null,
-    timestamp varchar(255) null,
-    `key`     int          not null,
-    constraint messages_pk
-        primary key (`key`)
+    id          int        null,
+    content     mediumtext null,
+    sent_at     datetime   null,
+    sender_id   int        null,
+    receiver_id int        null
 );
 

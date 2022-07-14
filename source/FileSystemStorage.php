@@ -26,7 +26,7 @@ final class FileSystemStorage
      */
     public function save(string $key, string $payload): void
     {
-        $filename = $this->storagePath . strtolower($key) . '.res';
+        $filename = $this->storagePath . '/' . strtolower($key) . '.res';
 
         file_put_contents($filename, $payload);
     }
@@ -37,7 +37,7 @@ final class FileSystemStorage
      */
     public function fetch(string $key): string
     {
-        $filename = $this->storagePath . strtolower($key) . '.res';
+        $filename = $this->storagePath . '/' . strtolower($key) . '.res';
 
         if (!file_exists($filename)) {
             return '{}';

@@ -18,36 +18,53 @@ class DatabaseContactStorage implements StoresContacts
     }
 
     /**
-     * @param string $name
+     * @param string $payload
      * @return void
      */
  public function save(string $payload): void
  {
-     $statement = $this->connection->prepare(
-         "INSERT INTO contacts(name)
-                    VALUES (:name)");
-
-     $success = $statement->execute(['name' => $payload]);
-
-     if (!$success) {
-         throw new RuntimeException('payload could not be saved');
+     $contacts = json_decode($payload,true);
+    $users = $contacts['users']?? [];
+     foreach ($users as $contact)
+     {
+         $statement = $this->connection->prepare('INSERT IGNORE INTO contacts(id, name) VALUES (:id, :name)');
+         $statement->execute([
+             'id' => $contact['id'],
+             'name' => $contact['name']
+         ]);
      }
+//     if (!$success) {
+//         throw new RuntimeException('payload could not be saved');
+//     }
  }
 
+    /**
+     * @return string
+     */
  public function fetch(): string
  {
-//     $statement = $this->connection->prepare(
-//         "SELECT name
-//                    FROM contacts
-//                    LIMIT 1");
-//
-//     $statement->execute();
-//
-//     $payload = $statement->fetchColumn();
-//     if ($payload === false) {
-//         return '';
-//     }
+     $emparray = array();
+     $sequence = 0;
+     $record = array();
+  $statement = $this->connection->prepare(
+         "SELECT *
+                    FROM contacts");
 
-     return'{}';
+     $statement->execute();
+
+     while ($res = $statement->fetch(PDO::FETCH_ASSOC)){
+         $sequence = $sequence + 1;
+         $record['sequence'] = $sequence;
+         $emparray[] = $res;
+
+     }
+     $record['users'] = $emparray;
+$users = (json_encode($record));
+
+     if ($users === false) {
+         return '';
+     }
+
+     return $users;
  }
 }
