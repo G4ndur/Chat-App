@@ -29,11 +29,11 @@ class StorageRequestHandler
         $key = $request->getQueryParameter('key');
 
         if ($key === null) {
-            throw new RuntimeException('key musst be specified');
+            throw new RuntimeException('key must be specified');
         }
 
         if ($key === '') {
-            throw new RuntimeException('key could not be empty');
+            throw new RuntimeException('key must not be empty');
         }
 
         $key = strtolower($key);
