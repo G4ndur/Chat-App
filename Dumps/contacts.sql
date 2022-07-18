@@ -1,6 +1,9 @@
 create table contacts
 (
-    id   int         null,
-    name varchar(64) null
+    id   int auto_increment
+        primary key,
+    name varchar(255) null
 );
+
+
 
