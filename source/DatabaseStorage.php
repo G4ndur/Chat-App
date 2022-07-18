@@ -46,11 +46,11 @@ class DatabaseStorage
     public function saveMessages(string $key, string $payload, string $timestamp): void
     {
         $statement = $this->connection->prepare(
-            "INSERT INTO messages(payload, sentat, id)
+            "INSERT INTO messages(payload, sent_at, id)
                     VALUES (:payload, :timestamp, :key)
                     ON DUPLICATE KEY UPDATE
                         payload = VALUES(payload),
-                        sentat = VALUES(sentat)");
+                        sent_at = VALUES(sent_at)");
 
         $success = $statement->execute(['key' => strtolower($key), 'payload' => $payload, 'timestamp' => $timestamp]);
 

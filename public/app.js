@@ -136,11 +136,16 @@ export default class App {
             })
             .then(() => this.renderChangeUserDialog());
 
+        this.queryAndRenderMessages();
+    }
+
+    queryAndRenderMessages() {
         messageStorage.load()
             .then(storedMessages => {
                 this.messages = storedMessages.messages;
-                console.log(storedMessages.messages);
-            });
+            })
+            .then(() => this.messageRender())
+            .then(() => setTimeout(this.queryAndRenderMessages.bind(this), 5000));
     }
 
     render() {
@@ -169,10 +174,11 @@ export default class App {
     messageRender() {
 
         const messageList = this.container.querySelector('#chat');
+        if (!messageList) {
+            return;
+        }
+
         messageList.innerHTML = '';
-
-        console.log(this.messages);
-
         this.messages.forEach(message => {
 
             if (message.senderId === this.currentID && message.receiverId === this.activeID) {
