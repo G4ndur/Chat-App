@@ -2,6 +2,7 @@ import Message from "./message.js";
 import User from "./user.js";
 import {inactiveContact, inactiveContactMod, messageReceived, messageSent} from "./template.js";
 import {ServerContactsStore, ServerMessageStore} from "./server_storages.js";
+import {emailInput, passwordInput, passwordRepeatInput} from "./inputs.js"
 
 
 const contactStorage = new ServerContactsStore();
@@ -64,15 +65,42 @@ const body = `
      </div>
  </div>
 `;
-const changeUser = `
-                 <div id="plist" class="people-list" style="text-align: center">
-                 <div><button class="btn new">New User</button><button class="btn cancel">Chats</button><button class="btn Msgdel">Delete all Messages</button></div>
+const landingPage = `
+<div class="row text-center">   </div>
+<div class="row">  <div class=col-5></div> <div class=col-2 ><input type="email" class="emailInput form-control" placeholder="E-Mail"></div>
+ <div class=col-5 ></div> </div>
+ <div class="row text-center"><p></p></div>
+<div class="row"><div class=col-5></div><div class=col-2><input type="password" class="form-control passwordInput" placeholder="Password">
+</div> <div class=col-5></div></div>
+<div class="row">
+<div class="row text-center"><p></p></div>
+<div class="col-4"></div> <div class="col-2 text-center"> <button class="btn btn-success loginButton">Login</button> </div>
+<div class="col-2 text-center"><button class="btn btn-primary registerButton">Register</button></div> <div class="col-4"></div>
+</div>
+                 <div id="plist " class="row people-list" style="text-align: center">
+                 <div class=""><button class="btn new">New User</button><button class="btn cancel">Chats</button><button class="btn Msgdel">Delete all Messages</button></div>
                      <ul class="list-unstyled chat-list mt-2 mb-0">
                       
                      </ul>
                  </div>
 `;
 
+const registerPage = `
+<div class="row text-center">   </div>
+<div class="row">  <div class=col-5></div> <div class=col-2 ><input type="email" class="emailInput form-control" placeholder="E-Mail"></div>
+ <div class=col-5 ></div> </div>
+ <div class="row text-center"><p></p></div>
+<div class="row"><div class=col-5></div><div class=col-2><input type="password" class="form-control passwordInput" placeholder="Password">
+</div> <div class=col-5></div></div>
+<div class="row text-center"><p></p></div>
+<div class="row"><div class=col-5></div><div class=col-2><input type="password" class="form-control passwordRepeat" placeholder="Repeat Password">
+</div> <div class=col-5></div></div>
+<div class="row">
+<div class="row text-center"><p></p></div>
+<div class="col-4"></div> <div class="col-2 text-center"> <button class="btn btn-danger cancel">Cancel</button> </div>
+<div class="col-2 text-center"><button class="btn btn-success registerButton">Register</button></div> <div class="col-4"></div>
+</div>
+`;
 
 export default class App {
     /**
@@ -104,6 +132,22 @@ export default class App {
      * @type {string}
      */
     messageInput;
+
+    /**
+     * @type {string}
+     */
+    emailInput;
+
+    /**
+     * @type {string}
+     */
+    passwordInput;
+
+    /**
+     * @type {string}
+     */
+    passwordRepeatInput;
+
 
     /**
      * @type {number}
@@ -259,15 +303,28 @@ export default class App {
     }
 
     renderChangeUserDialog() {
-        this.container.innerHTML = changeUser;
+        this.container.innerHTML = landingPage;
 
         this.container.querySelector('.new')
             ?.addEventListener('click', this.showModeratorPromptToAddNewUser.bind(this));
         this.container.querySelector('.cancel').addEventListener('click', this.onCancel.bind(this));
         this.container.querySelector('.Msgdel').addEventListener('click', this.onDeleteMessages);
+        this.container.querySelector('.registerButton').addEventListener('click', this.renderRegisterPage.bind(this))
+        this.container.querySelector('.emailInput').oninput = e => emailInput(e);
+        this.container.querySelector('.passwordInput').oninput = e => passwordInput(e);
+
+
+
         this.renderChangeUserList();
     }
+renderRegisterPage(){
+        this.container.innerHTML = registerPage;
+    this.container.querySelector('.cancel').addEventListener('click', this.renderChangeUserDialog.bind(this))
+    this.container.querySelector('.emailInput').oninput = e => emailInput(e);
+    this.container.querySelector('.passwordInput').oninput = e => passwordInput(e);
+    this.container.querySelector('.passwordRepeatInput').oninput = e => passwordRepeatInput(e);
 
+}
     renderChangeUserList() {
 
         const userList = this.container.querySelector('.chat-list');
