@@ -10,3 +10,14 @@ export function passwordInput(e){
 export function passwordRepeatInput(e){
     app.passwordRepeatInput = e.target.value.trim();
 }
+
+/**
+ * @param {Event} e
+ */
+export function onInput(e,) {
+    app.messageInput = e.target.value.trim();
+}
+
+export function nameInput(e){
+    app.nameInput = e.target.value.trim();
+}

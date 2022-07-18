@@ -2,7 +2,7 @@ import Message from "./message.js";
 import User from "./user.js";
 import {inactiveContact, inactiveContactMod, messageReceived, messageSent} from "./template.js";
 import {ServerContactsStore, ServerMessageStore} from "./server_storages.js";
-import {emailInput, passwordInput, passwordRepeatInput} from "./inputs.js"
+import {emailInput, passwordInput, passwordRepeatInput, onInput, nameInput} from "./inputs.js"
 
 
 const contactStorage = new ServerContactsStore();
@@ -87,6 +87,9 @@ const landingPage = `
 
 const registerPage = `
 <div class="row text-center">   </div>
+<div class="row"><div class=col-5></div><div class=col-2><input type="text" class="form-control nameInput" placeholder="Name">
+</div> <div class=col-5></div></div>
+<div class="row text-center"><p></p></div>
 <div class="row">  <div class=col-5></div> <div class=col-2 ><input type="email" class="emailInput form-control" placeholder="E-Mail"></div>
  <div class=col-5 ></div> </div>
  <div class="row text-center"><p></p></div>
@@ -195,7 +198,7 @@ export default class App {
     render() {
         this.container.querySelector('.new')
             ?.addEventListener('click', this.showChatPromptToAddNewUser.bind(this));
-        this.container.querySelector('.form-control').oninput = e => this.onInput(e);
+        this.container.querySelector('.form-control').oninput = e => onInput(e);
         this.container.querySelector('.fa-send').addEventListener('click', this.onSend.bind(this));
         this.container.querySelector('.change').addEventListener('click', this.renderChangeUserDialog.bind(this));
 
@@ -281,12 +284,6 @@ export default class App {
         this.messageRender();
     }
 
-    /**
-     * @param {Event} e
-     */
-    onInput(e,) {
-        this.messageInput = e.target.value.trim();
-    }
 
     onSend() {
         console.log('hello');
@@ -323,6 +320,7 @@ renderRegisterPage(){
     this.container.querySelector('.emailInput').oninput = e => emailInput(e);
     this.container.querySelector('.passwordInput').oninput = e => passwordInput(e);
     this.container.querySelector('.passwordRepeatInput').oninput = e => passwordRepeatInput(e);
+    this.container.querySelector('.nameInput').oninput = e => nameInput(e);
 
 }
     renderChangeUserList() {
