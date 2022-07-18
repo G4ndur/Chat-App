@@ -42,7 +42,7 @@ class StorageRequestHandler
 
             $body = $request->getBody();
             if ($body === '') {
-                throw new RuntimeException('body could not be empty');
+                throw new RuntimeException('body must not be empty');
             }
 
             if ($key === 'contacts') {
