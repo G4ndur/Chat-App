@@ -2,11 +2,12 @@ import Message from "./message.js";
 import User from "./user.js";
 import {inactiveContact, inactiveContactMod, messageReceived, messageSent} from "./template.js";
 import {ServerContactsStore, ServerMessageStore} from "./server_storages.js";
-import {emailInput, passwordInput, passwordRepeatInput, onInput, nameInput} from "./inputs.js"
-
+import {onTypingEmail, onTypingName, onTypingChatMessage, onTypingPassword, onRepeatingPassword} from "./inputs.js";
+import UserRepository from "./userRepository.js";
 
 const contactStorage = new ServerContactsStore();
 const messageStorage = new ServerMessageStore();
+const userRepository = new UserRepository();
 
 
 // Alles nicht-dynamische
@@ -73,9 +74,9 @@ const landingPage = `
 <div class="row"><div class=col-5></div><div class=col-2><input type="password" class="form-control passwordInput" placeholder="Password">
 </div> <div class=col-5></div></div>
 <div class="row">
-<div class="row text-center"><p></p></div>
-<div class="col-4"></div> <div class="col-2 text-center"> <button class="btn btn-success loginButton">Login</button> </div>
-<div class="col-2 text-center"><button class="btn btn-primary registerButton">Register</button></div> <div class="col-4"></div>
+<div class="row"><p></p></div>
+<div class="col-4 text-right"></div> <div class="col-2  text-end "> <button class="btn btn-success loginButton">Login</button> </div>
+<div class="col-2 text-start"><button class="btn btn-primary registerButton">Register</button></div> <div class="col-4"></div>
 </div>
                  <div id="plist " class="row people-list" style="text-align: center">
                  <div class=""><button class="btn new">New User</button><button class="btn cancel">Chats</button><button class="btn Msgdel">Delete all Messages</button></div>
@@ -100,8 +101,8 @@ const registerPage = `
 </div> <div class=col-5></div></div>
 <div class="row">
 <div class="row text-center"><p></p></div>
-<div class="col-4"></div> <div class="col-2 text-center"> <button class="btn btn-danger cancel">Cancel</button> </div>
-<div class="col-2 text-center"><button class="btn btn-success registerButton">Register</button></div> <div class="col-4"></div>
+<div class="col-4"></div> <div class="col-2 text-end"> <button class="btn btn-danger cancel">Cancel</button> </div>
+<div class="col-2 text-start"><button class="btn btn-success registerBtn">Register</button></div> <div class="col-4"></div>
 </div>
 `;
 
@@ -135,21 +136,25 @@ export default class App {
      * @type {string}
      */
     messageInput;
+    /**
+     *
+     * @type {string}
+     */
+    emailInput = '';
 
     /**
      * @type {string}
      */
-    emailInput;
+    passwordInput = '';
 
     /**
      * @type {string}
      */
-    passwordInput;
-
+    passwordRepeatInput = '';
     /**
      * @type {string}
      */
-    passwordRepeatInput;
+    nameInput = '';
 
 
     /**
@@ -181,7 +186,7 @@ export default class App {
                 User.sequence = storedContacts.sequence;
 
             })
-            .then(() => this.renderChangeUserDialog());
+            .then(() => this.renderLogin());
 
         this.queryAndRenderMessages();
     }
@@ -195,12 +200,12 @@ export default class App {
             .then(() => setTimeout(this.queryAndRenderMessages.bind(this), 5000));
     }
 
-    render() {
+    renderChat() {
         this.container.querySelector('.new')
             ?.addEventListener('click', this.showChatPromptToAddNewUser.bind(this));
-        this.container.querySelector('.form-control').oninput = e => onInput(e);
+        this.container.querySelector('.form-control').oninput = e => onTypingChatMessage(this, e);
         this.container.querySelector('.fa-send').addEventListener('click', this.onSend.bind(this));
-        this.container.querySelector('.change').addEventListener('click', this.renderChangeUserDialog.bind(this));
+        this.container.querySelector('.change').addEventListener('click', this.renderLogin.bind(this));
 
         const userList = this.container.querySelector('.chat-list');
         userList.innerHTML = '';
@@ -252,7 +257,7 @@ export default class App {
 
         this.users.push(new User(inputName));
         contactStorage.save(this.users, User.sequence);
-        this.render();
+        this.renderChat();
     };
 
     showModeratorPromptToAddNewUser() {
@@ -267,6 +272,28 @@ export default class App {
 
         this.renderChangeUserList();
     };
+
+    /**
+     *
+     */
+    onRegistration() {
+        console.log(this.passwordInput, this.emailInput, this.nameInput, this.passwordRepeatInput);
+        if (!this.passwordInput) {
+            alert('Fill all fields!');
+        } else if (!this.emailInput) {
+            alert('Fill all fields!');
+        } else if (!this.nameInput) {
+            alert('Fill all fields!');
+        } else if (!this.passwordRepeatInput) {
+            alert('Fill all fields!');
+        } else if (this.passwordInput != this.passwordRepeatInput) {
+            alert('Passwords arent identical');
+        } else {
+            const user = new User(this.nameInput,this.emailInput, this.passwordInput)
+        userRepository.save(user);
+
+        }
+    }
 
     /**
      * @param {User} user
@@ -296,33 +323,36 @@ export default class App {
     onCancel() {
 
         this.container.innerHTML = body;
-        this.render();
+        this.renderChat();
     }
 
-    renderChangeUserDialog() {
+    renderLogin() {
         this.container.innerHTML = landingPage;
 
         this.container.querySelector('.new')
             ?.addEventListener('click', this.showModeratorPromptToAddNewUser.bind(this));
         this.container.querySelector('.cancel').addEventListener('click', this.onCancel.bind(this));
         this.container.querySelector('.Msgdel').addEventListener('click', this.onDeleteMessages);
-        this.container.querySelector('.registerButton').addEventListener('click', this.renderRegisterPage.bind(this))
-        this.container.querySelector('.emailInput').oninput = e => emailInput(e);
-        this.container.querySelector('.passwordInput').oninput = e => passwordInput(e);
+        this.container.querySelector('.registerButton').addEventListener('click', this.renderRegisterPage.bind(this));
+        this.container.querySelector('.emailInput').oninput = e => onTypingEmail(this, e);
+        this.container.querySelector('.passwordInput').oninput = e => onTypingPassword(this,e);
 
 
-
-        this.renderChangeUserList();
+     //   this.renderChangeUserList();
     }
-renderRegisterPage(){
-        this.container.innerHTML = registerPage;
-    this.container.querySelector('.cancel').addEventListener('click', this.renderChangeUserDialog.bind(this))
-    this.container.querySelector('.emailInput').oninput = e => emailInput(e);
-    this.container.querySelector('.passwordInput').oninput = e => passwordInput(e);
-    this.container.querySelector('.passwordRepeatInput').oninput = e => passwordRepeatInput(e);
-    this.container.querySelector('.nameInput').oninput = e => nameInput(e);
 
-}
+    renderRegisterPage() {
+        this.container.innerHTML = registerPage;
+        this.container.querySelector('.cancel').addEventListener('click', this.renderLogin.bind(this));
+        this.container.querySelector('.emailInput').oninput = e => onTypingEmail(this,e);
+        this.container.querySelector('.passwordInput').oninput = e => onTypingPassword(this,e);
+        this.container.querySelector('.passwordRepeat').oninput = e => onRepeatingPassword(this,e);
+        this.container.querySelector('.nameInput').oninput = e => onTypingName(this, e);
+        this.container.querySelector('.registerBtn').addEventListener('click', this.onRegistration.bind(this));
+
+
+    }
+
     renderChangeUserList() {
 
         const userList = this.container.querySelector('.chat-list');

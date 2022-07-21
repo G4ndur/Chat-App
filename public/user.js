@@ -1,8 +1,4 @@
 export default class User {
-    /**
-     * @type {number}
-     */
-    id;
 
     /**
      * @type {string}
@@ -10,13 +6,25 @@ export default class User {
     name;
 
     /**
-     * @param {string} name
-     * @param {number|null} id
+     * @type {string}
      */
-    constructor(name, id = null) {
-        this.name = name;
+    email;
 
-        this.id = id ? id : ++User.sequence;
+    /**
+     *@type {string}
+     */
+    password;
+
+    /**
+     * @param {string} name
+     * @param {string} email
+     * @param {string} password
+     *
+     */
+    constructor(name,email,password) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
     }
 }
 User.sequence = 0

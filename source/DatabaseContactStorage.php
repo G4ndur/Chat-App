@@ -34,7 +34,7 @@ class DatabaseContactStorage implements StoresContacts
             ]);
         }
 //     if (!$success) {
-//         throw new RuntimeException('payload could not be saved');
+//
 //     }
     }
 
