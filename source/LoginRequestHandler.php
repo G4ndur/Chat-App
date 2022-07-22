@@ -3,7 +3,7 @@
 class LoginRequestHandler
 {
     /** @var ProvidesUsers */
-    private $user;
+    private $userRepository;
 
 
     /**
@@ -11,7 +11,7 @@ class LoginRequestHandler
      */
     public function __construct(ProvidesUsers $user)
     {
-        $this->user = $user;
+        $this->userRepository = $user;
     }
 
     /**
@@ -40,13 +40,25 @@ class LoginRequestHandler
             if ($body === '') {
                 throw new RuntimeException('body must not be empty');
             }
-
-            if ($key === '') {
-                $this->user->save($body);
+            $login = json_decode($body);
+            $loginData = new User;
+            $loginData->setEmail($login['email']);
+            $loginData->setPassword($login['password']);
+            $foundUser = $this->userRepository->findOneByMail($login['email']);
+            if ($foundUser['password'] != $loginData['password']){
+                return $response->withBody(json_encode([
+                    'success' => false,
+                ]));
             }
+            return $response->withBody(json_encode([
+                'success' => true,
+            ]));
 
 
-            return $response;
+//            return $response->withBody(json_encode([
+//                'success' => true,
+//            ]));
+
         }
 
         $response->withHeader('Content-Type', 'application/json');

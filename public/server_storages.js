@@ -81,7 +81,6 @@ export class ServerMessageStore {
                         new Date(record.sentAt)
                     );
                 });
-                console.log(payload.messages);
                 return payload;
             });
 

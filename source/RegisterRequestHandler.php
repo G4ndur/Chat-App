@@ -3,7 +3,7 @@
 class RegisterRequestHandler
 {
     /** @var ProvidesUsers */
-    private $user;
+    private $userRepository;
 
 
     /**
@@ -11,7 +11,7 @@ class RegisterRequestHandler
      */
     public function __construct(ProvidesUsers $user)
     {
-        $this->user = $user;
+        $this->userRepository = $user;
     }
 
     /**
@@ -42,17 +42,20 @@ class RegisterRequestHandler
             }
 
             if ($key === 'registration') {
-                $this->user->save($body);
+                $registration = json_decode($body,true);
+                $user = new User();
+                $user->setEmail($registration['email']);
+                $user->setName($registration['name']);
+                $user->setPassword($registration['password']);
+                $this->userRepository->persist($user);
             }
 
-
-            return $response;
+            return $response->withBody(json_encode([
+                'success' => true,
+            ]));
         }
 
         $response->withHeader('Content-Type', 'application/json');
-        if ($key === 'checkDouble') {
-            $response->withBody($this->user->fetch());
-        }
         return $response;
     }
 }

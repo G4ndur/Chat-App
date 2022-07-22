@@ -5,7 +5,6 @@
  */
 export function onTypingEmail(app, e){
     app.emailInput = e.target.value.trim();
-    console.log(app.emailInput)
 }
 /**
  * @param {App} app
@@ -13,7 +12,6 @@ export function onTypingEmail(app, e){
  */
 export function onTypingPassword(app, e){
     app.passwordInput = e.target.value.trim();
-    console.log(app.passwordInput)
 }
 
 /**

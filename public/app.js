@@ -277,7 +277,6 @@ export default class App {
      *
      */
     onRegistration() {
-        console.log(this.passwordInput, this.emailInput, this.nameInput, this.passwordRepeatInput);
         if (!this.passwordInput) {
             alert('Fill all fields!');
         } else if (!this.emailInput) {
@@ -286,11 +285,18 @@ export default class App {
             alert('Fill all fields!');
         } else if (!this.passwordRepeatInput) {
             alert('Fill all fields!');
-        } else if (this.passwordInput != this.passwordRepeatInput) {
+        } else if (this.passwordInput !== this.passwordRepeatInput) {
             alert('Passwords arent identical');
         } else {
-            const user = new User(this.nameInput,this.emailInput, this.passwordInput)
-        userRepository.save(user);
+            const user = new User(this.nameInput, this.emailInput, this.passwordInput)
+            userRepository.save(user)
+                .then(response => response.json())
+                .then(response => {
+                        if (response.success) {
+                            window.location.href = '/';
+                        }
+                    }
+                );
 
         }
     }
@@ -313,7 +319,6 @@ export default class App {
 
 
     onSend() {
-        console.log('hello');
         this.messages.push(new Message(this.currentID, this.activeID, this.messageInput));
         messageStorage.save(this.messages);
         this.messageRender();
@@ -335,18 +340,19 @@ export default class App {
         this.container.querySelector('.Msgdel').addEventListener('click', this.onDeleteMessages);
         this.container.querySelector('.registerButton').addEventListener('click', this.renderRegisterPage.bind(this));
         this.container.querySelector('.emailInput').oninput = e => onTypingEmail(this, e);
-        this.container.querySelector('.passwordInput').oninput = e => onTypingPassword(this,e);
+        this.container.querySelector('.passwordInput').oninput = e => onTypingPassword(this, e);
+        this.container.querySelector('.loginButton').addEventListener('click', this.onLogin.bind(this));
 
 
-     //   this.renderChangeUserList();
+        //   this.renderChangeUserList();
     }
 
     renderRegisterPage() {
         this.container.innerHTML = registerPage;
         this.container.querySelector('.cancel').addEventListener('click', this.renderLogin.bind(this));
-        this.container.querySelector('.emailInput').oninput = e => onTypingEmail(this,e);
-        this.container.querySelector('.passwordInput').oninput = e => onTypingPassword(this,e);
-        this.container.querySelector('.passwordRepeat').oninput = e => onRepeatingPassword(this,e);
+        this.container.querySelector('.emailInput').oninput = e => onTypingEmail(this, e);
+        this.container.querySelector('.passwordInput').oninput = e => onTypingPassword(this, e);
+        this.container.querySelector('.passwordRepeat').oninput = e => onRepeatingPassword(this, e);
         this.container.querySelector('.nameInput').oninput = e => onTypingName(this, e);
         this.container.querySelector('.registerBtn').addEventListener('click', this.onRegistration.bind(this));
 
@@ -394,6 +400,18 @@ export default class App {
         messageStorage.save([]);
         alert('All messages have been deleted!');
     }
+
+    onLogin()
+    {
+        userRepository.login(this.emailInput,this.passwordInput)
+            .then(response => response.json)
+            .then(response => {
+                if (response.success) {
+                   console.log('IT WORKS');
+                }
+            })
+    }
+
 };
 
 

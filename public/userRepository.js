@@ -1,8 +1,6 @@
 import User from "./user.js"
 
-export default class UserRepository{
-
-
+export default class UserRepository {
 
 
     /**
@@ -29,18 +27,29 @@ export default class UserRepository{
     }
 
 
-
-/**
- * @param {User} user
- * @returns Promise<any>
- */
-save(user) {
-    return this.setItem('registration', JSON.stringify(user));
+    /**
+     * @param {User} user
+     * @returns Promise<any>
+     */
+    save(user) {
+        return this.setItem('registration', JSON.stringify(user));
     }
 
+    /**
+     *
+     * @param email {string}
+     * @param password {string}
+     * @returns {Promise<Response>}
+     */
+    login(email, password) {
+        const user = new User('',email,password)
 
-// checkDuplicate(){
-//     return this.getItem('checkDouble')
-// }
+        return fetch('/login.php?key=login', {
+            method: 'POST',
+            body: user
+        });
+
+
+    }
 
 }

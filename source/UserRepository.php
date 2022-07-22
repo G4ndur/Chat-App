@@ -2,7 +2,7 @@
 require_once __DIR__ . '/../source/ProvidesUsers.php';
 
 
-class UserRepository  implements ProvidesUsers
+class UserRepository implements ProvidesUsers
 {
     /**
      * @var PDO
@@ -17,38 +17,39 @@ class UserRepository  implements ProvidesUsers
         $this->connection = $connection;
     }
 
-    public function findOne(int $id):User
+    public function findOne(int $id): ?User
     {
-return User;
+        return null;
     }
 
-    public function findOneByMail(string $email):User
+    public function findOneByMail(string $email): ?User
     {
-return User;
-    }
+        $user = new User();
 
-    public function persist(User  $user):void
-    {
-
-    }
-
-
-    public function save(string $payload): void
-    {
-        $user = json_decode($payload, true);
-        print_r($user);
-            $statement = $this->connection->prepare('INSERT INTO contacts( name, email, password) 
-            VALUES ( :name, :email, :password)
-            ON DUPLICATE KEY UPDATE id=id');
-
-            $statement->execute([
-                'name' => $user['name'],
-                'email' => $user['email'],
-                'password' => $user['password']
-
-            ]);
+        $statement = $this->connection->prepare('SELECT 1 FROM contacts WHERE
+                           email = :email');
+        $statement->setFetchMode(PDO::FETCH_ASSOC);
+        foreach ($statement as $record) {
+            $user->setPassword($record['password']);
+            $user->setName($record['name']);
+            $user->setEmail($record['email']);
+            $user->setId($record['id']);
         }
+        return $user;
+    }
 
+    public function persist(User $user): void
+    {
+        $statement = $this->connection->prepare('INSERT IGNORE INTO contacts( name, email, password) 
+            VALUES ( :name, :email, :password)');
+
+        $statement->execute([
+            'name' => $user->getName(),
+            'email' => $user->getEmail(),
+            'password' => $user->getPassword()
+
+        ]);
+    }
 //    /**
 //     * @param string $email
 //     * @return void
