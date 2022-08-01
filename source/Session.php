@@ -30,10 +30,11 @@ class Session
 
     /**
      * @param string $key
+     * @param null $default
      * @return mixed
      */
-    public function get(string $key)
+    public function get(string $key, $default = null)
     {
-        return $_SESSION[$key];
+        return $_SESSION[$key] ?? $default;
     }
 }

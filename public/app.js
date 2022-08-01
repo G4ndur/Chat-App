@@ -4,6 +4,7 @@ import {inactiveContact, inactiveContactMod, messageReceived, messageSent} from 
 import {ServerContactsStore, ServerMessageStore} from "./server_storages.js";
 import {onTypingEmail, onTypingName, onTypingChatMessage, onTypingPassword, onRepeatingPassword} from "./inputs.js";
 import UserRepository from "./userRepository.js";
+import {getItem} from "./session.js"
 
 const contactStorage = new ServerContactsStore();
 const messageStorage = new ServerMessageStore();
@@ -155,7 +156,7 @@ export default class App {
 
 
     /**
-     * @type {number}
+     * @type {int}
      */
     currentID = 1;
 
@@ -182,7 +183,7 @@ export default class App {
                 this.users = storedContacts.users;
                 User.sequence = storedContacts.sequence;
             })
-            .then(() => this.renderLogin());
+            .then(() => this.loggedInCheck());
 
 
         this.queryAndRenderMessages();
@@ -203,7 +204,7 @@ export default class App {
 
         this.container.querySelector('.form-control').oninput = e => onTypingChatMessage(this, e);
         this.container.querySelector('.fa-send').addEventListener('click', this.onSend.bind(this));
-        this.container.querySelector('.change').addEventListener('click', this.renderLogin.bind(this));
+        this.container.querySelector('.change').addEventListener('click', this.onLogout.bind(this));
 
         const userList = this.container.querySelector('.chat-list');
         userList.innerHTML = '';
@@ -300,10 +301,21 @@ export default class App {
 
     }
 
-    onCancel() {
+    onLogout() {
+        this.killSession();
+        this.renderLogin();
 
-        this.container.innerHTML = body;
-        this.renderChat();
+    }
+
+    killSession(){
+        console.log('Hello')
+        fetch(`/logout.php`, {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
     }
 
     renderLogin() {
@@ -319,7 +331,7 @@ export default class App {
 
     renderRegisterPage() {
         this.container.innerHTML = registerPage;
-        this.container.querySelector('.cancel').addEventListener('click', this.renderLogin.bind(this));
+        this.container.querySelector('.cancel').addEventListener('click', this.renderLogin().bind(this));
         this.container.querySelector('.emailInput').oninput = e => onTypingEmail(this, e);
         this.container.querySelector('.passwordInput').oninput = e => onTypingPassword(this, e);
         this.container.querySelector('.passwordRepeat').oninput = e => onRepeatingPassword(this, e);
@@ -365,12 +377,9 @@ export default class App {
         this.renderChangeUserList();
     }
 
-    onDeleteMessages() {
-        this.messages = [];
-        messageStorage.save([]);
-        alert('All messages have been deleted!');
-    }
-
+    /**
+     *
+     */
     onLogin()
     {
         const userLogin = new User(null,'', this.emailInput, this.passwordInput)
@@ -393,6 +402,27 @@ export default class App {
 
 
 };
+
+    /**
+     *
+     * @returns {Promise<any>}
+     */
+    loggedInCheck(){
+return getItem()
+    .then(response => response.json())
+    .then(payload => {
+        if (payload.success === true){
+            this.currentID = payload.user
+            this.renderChat()
+            this.container.querySelector('.currentUserName').innerHTML ='Current User : ' + payload.name
+
+        }
+        else {this.renderLogin()}
+
+    })
+
+
+    }
 }
 
 

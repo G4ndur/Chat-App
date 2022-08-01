@@ -5,13 +5,18 @@ class LoginRequestHandler
     /** @var ProvidesUsers */
     private $userRepository;
 
+    /** @var Session */
+    private $session;
+
 
     /**
+     * @param Session $session
      * @param ProvidesUsers $user
      */
-    public function __construct(ProvidesUsers $user)
+    public function __construct(Session $session, ProvidesUsers $user)
     {
         $this->userRepository = $user;
+        $this->session = $session;
     }
 
     /**
@@ -22,50 +27,37 @@ class LoginRequestHandler
     {
         $response = new Response();
 
-        $key = $request->getQueryParameter('key');
-
-        if ($key === null) {
-            throw new RuntimeException('key must be specified');
+        if ($request->getMethod() !== Request::METHOD_POST) {
+            $this->session->set('is_logged_in', false);
+            return $response;
         }
 
-        if ($key === '') {
-            throw new RuntimeException('key must not be empty');
+        $response->withHeader('Content-Type', 'application/json');
+
+        $body = $request->getBody();
+        if ($body === '') {
+            throw new RuntimeException('body must not be empty');
         }
+        $login = json_decode($body, true);
 
-        $key = strtolower($key);
-
-        if ($request->getMethod() === Request::METHOD_POST) {
-
-            $body = $request->getBody();
-            if ($body === '') {
-                throw new RuntimeException('body must not be empty');
-            }
-            $login = json_decode($body, true);
-            $loginData = new User;
-            $loginData->setEmail($login['email']);
-            $loginData->setPassword($login['password']);
-            $foundUser = $this->userRepository->findOneByMail($login['email']);
-            if ($foundUser->getPassword() != $login['password']) {
-                return $response->withBody(json_encode([
-                    'success' => false,
-
-                ]));
-            }
-            else return $response->withBody(json_encode([
+        $foundUser = $this->userRepository->findOneByMail($login['email']);
+        if ($foundUser->getPassword() === $login['password']) {
+            $this->session->set('is_logged_in', true);
+            $this->session->set('user_id', $foundUser->getId());
+            $this->session->set('user_name', $foundUser->getName());
+            return $response->withBody(json_encode([
                 'success' => true,
                 'email' => $foundUser->getEmail(),
                 'id' => $foundUser->getId(),
                 'name' => $foundUser->getName()
             ]));
 
-
-//            return $response->withBody(json_encode([
-//                'success' => true,
-//            ]));
-
         }
 
-        $response->withHeader('Content-Type', 'application/json');
-        return $response;
+        $this->session->set('is_logged_in', false);
+
+        return $response->withBody(json_encode([
+            'success' => false,
+        ]));
     }
 }
