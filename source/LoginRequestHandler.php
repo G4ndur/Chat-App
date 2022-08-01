@@ -40,18 +40,22 @@ class LoginRequestHandler
             if ($body === '') {
                 throw new RuntimeException('body must not be empty');
             }
-            $login = json_decode($body);
+            $login = json_decode($body, true);
             $loginData = new User;
             $loginData->setEmail($login['email']);
             $loginData->setPassword($login['password']);
             $foundUser = $this->userRepository->findOneByMail($login['email']);
-            if ($foundUser['password'] != $loginData['password']){
+            if ($foundUser->getPassword() != $login['password']) {
                 return $response->withBody(json_encode([
                     'success' => false,
+
                 ]));
             }
-            return $response->withBody(json_encode([
+            else return $response->withBody(json_encode([
                 'success' => true,
+                'email' => $foundUser->getEmail(),
+                'id' => $foundUser->getId(),
+                'name' => $foundUser->getName()
             ]));
 
 

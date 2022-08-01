@@ -26,14 +26,18 @@ class UserRepository implements ProvidesUsers
     {
         $user = new User();
 
-        $statement = $this->connection->prepare('SELECT 1 FROM contacts WHERE
+        $statement = $this->connection->prepare('SELECT * FROM contacts WHERE
                            email = :email');
+        $statement->execute([
+            'email' => $email
+        ]);
         $statement->setFetchMode(PDO::FETCH_ASSOC);
-        foreach ($statement as $record) {
-            $user->setPassword($record['password']);
-            $user->setName($record['name']);
+        $result = $statement->fetchAll();
+        foreach ($result as $record) {
             $user->setEmail($record['email']);
             $user->setId($record['id']);
+            $user->setName($record['name']);
+            $user->setPassword($record['password']);
         }
         return $user;
     }

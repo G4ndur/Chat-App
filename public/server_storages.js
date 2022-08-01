@@ -36,7 +36,7 @@ export class ServerContactsStore {
                 return payload;
             })
             .then(contacts => {
-                contacts.users = contacts.users.map(record => new User(record.name, record.id));
+                contacts.users = contacts.users.map(record => new User(record.id,record.name,'',''));
                 return contacts;
             });
     };

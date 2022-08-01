@@ -37,19 +37,20 @@ export default class UserRepository {
 
     /**
      *
-     * @param email {string}
-     * @param password {string}
-     * @returns {Promise<Response>}
+     * @param user {User}
+     * @returns {Promise<any>}
      */
-    login(email, password) {
-        const user = new User('',email,password)
-
-        return fetch('/login.php?key=login', {
-            method: 'POST',
-            body: user
-        });
-
-
+    login(user) {
+        return this.setItemLogin('login', JSON.stringify(user))
     }
-
+    /**
+     * @param {string} key
+     * @param {string} payload
+     */
+    setItemLogin(key, payload) {
+        return fetch(`/login.php?key=${key}`, {
+            method: 'POST',
+            body: payload
+        });
+    }
 }

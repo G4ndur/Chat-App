@@ -20,7 +20,8 @@ const body = `
                  <!-- Anfang der Kontaktliste -->
 
                  <div id="plist" class="people-list">
-                 <div><button class="btn new">New User</button><button class="btn change">Change User</button></div>
+                 <div class="text-center "><button class="btn change">logout</button></div>
+                 <div><p class="currentUserName"></p></div>
                      <ul class="list-unstyled chat-list mt-2 mb-0">
                       
                      </ul>
@@ -78,11 +79,7 @@ const landingPage = `
 <div class="col-4 text-right"></div> <div class="col-2  text-end "> <button class="btn btn-success loginButton">Login</button> </div>
 <div class="col-2 text-start"><button class="btn btn-primary registerButton">Register</button></div> <div class="col-4"></div>
 </div>
-                 <div id="plist " class="row people-list" style="text-align: center">
-                 <div class=""><button class="btn new">New User</button><button class="btn cancel">Chats</button><button class="btn Msgdel">Delete all Messages</button></div>
-                     <ul class="list-unstyled chat-list mt-2 mb-0">
-                      
-                     </ul>
+                
                  </div>
 `;
 
@@ -184,9 +181,9 @@ export default class App {
             .then(storedContacts => {
                 this.users = storedContacts.users;
                 User.sequence = storedContacts.sequence;
-
             })
             .then(() => this.renderLogin());
+
 
         this.queryAndRenderMessages();
     }
@@ -201,8 +198,9 @@ export default class App {
     }
 
     renderChat() {
-        this.container.querySelector('.new')
-            ?.addEventListener('click', this.showChatPromptToAddNewUser.bind(this));
+        this.container.innerHTML = body;
+
+
         this.container.querySelector('.form-control').oninput = e => onTypingChatMessage(this, e);
         this.container.querySelector('.fa-send').addEventListener('click', this.onSend.bind(this));
         this.container.querySelector('.change').addEventListener('click', this.renderLogin.bind(this));
@@ -248,30 +246,7 @@ export default class App {
 
     }
 
-    showChatPromptToAddNewUser() {
-        let inputName = prompt('Please enter your name', '');
 
-        if (!inputName) {
-            return;
-        }
-
-        this.users.push(new User(inputName));
-        contactStorage.save(this.users, User.sequence);
-        this.renderChat();
-    };
-
-    showModeratorPromptToAddNewUser() {
-        let inputName = prompt('Please enter your name', '');
-
-        if (!inputName) {
-            return;
-        }
-
-        this.users.push(new User(inputName));
-        contactStorage.save(this.users, User.sequence);
-
-        this.renderChangeUserList();
-    };
 
     /**
      *
@@ -288,7 +263,7 @@ export default class App {
         } else if (this.passwordInput !== this.passwordRepeatInput) {
             alert('Passwords arent identical');
         } else {
-            const user = new User(this.nameInput, this.emailInput, this.passwordInput)
+            const user = new User( null ,this.nameInput, this.emailInput, this.passwordInput)
             userRepository.save(user)
                 .then(response => response.json())
                 .then(response => {
@@ -333,11 +308,6 @@ export default class App {
 
     renderLogin() {
         this.container.innerHTML = landingPage;
-
-        this.container.querySelector('.new')
-            ?.addEventListener('click', this.showModeratorPromptToAddNewUser.bind(this));
-        this.container.querySelector('.cancel').addEventListener('click', this.onCancel.bind(this));
-        this.container.querySelector('.Msgdel').addEventListener('click', this.onDeleteMessages);
         this.container.querySelector('.registerButton').addEventListener('click', this.renderRegisterPage.bind(this));
         this.container.querySelector('.emailInput').oninput = e => onTypingEmail(this, e);
         this.container.querySelector('.passwordInput').oninput = e => onTypingPassword(this, e);
@@ -403,15 +373,26 @@ export default class App {
 
     onLogin()
     {
-        userRepository.login(this.emailInput,this.passwordInput)
-            .then(response => response.json)
+        const userLogin = new User(null,'', this.emailInput, this.passwordInput)
+        userRepository.login(userLogin)
+            .then(response => response.json())
             .then(response => {
-                if (response.success) {
-                   console.log('IT WORKS');
+                if (response.success === false) {
+
+                    console.log('Wrong Email or Password')
+
+                }
+                else {
+                    console.log('Login Successful');
+                    this.currentID = response.id
+                    this.renderChat()
+                    this.container.querySelector('.currentUserName').innerHTML ='Current User : ' + response.name
+
                 }
             })
-    }
+
 
 };
+}
 
 
