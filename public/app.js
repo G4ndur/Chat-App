@@ -12,7 +12,7 @@ const userRepository = new UserRepository();
 
 
 // Alles nicht-dynamische
-const body = `
+const chat = `
  <div  class=" container">
      <div class="row clearfix">
          <div class=" col-lg-12">
@@ -199,11 +199,16 @@ export default class App {
     }
 
     renderChat() {
-        this.container.innerHTML = body;
+        this.container.innerHTML = chat;
 
 
         this.container.querySelector('.form-control').oninput = e => onTypingChatMessage(this, e);
         this.container.querySelector('.fa-send').addEventListener('click', this.onSend.bind(this));
+        this.container.querySelector('.form-control').addEventListener("keyup" ,function(event){
+            if (event.keyCode === 13) {
+                event.preventDefault();
+                document.querySelector('.fa-send').click();
+            }});
         this.container.querySelector('.change').addEventListener('click', this.onLogout.bind(this));
 
         const userList = this.container.querySelector('.chat-list');
@@ -297,6 +302,7 @@ export default class App {
     onSend() {
         this.messages.push(new Message(this.currentID, this.activeID, this.messageInput));
         messageStorage.save(this.messages);
+        this.container.querySelector('.form-control').value = '';
         this.messageRender();
 
     }
@@ -324,20 +330,56 @@ export default class App {
         this.container.querySelector('.emailInput').oninput = e => onTypingEmail(this, e);
         this.container.querySelector('.passwordInput').oninput = e => onTypingPassword(this, e);
         this.container.querySelector('.loginButton').addEventListener('click', this.onLogin.bind(this));
-
+        this.container.querySelector('.passwordInput').addEventListener("keyup" ,function(e){
+            if (e.keyCode === 13) {
+                e.preventDefault();
+                document.querySelector('.loginButton').click();
+            }});
+        this.container.querySelector('.emailInput').addEventListener("keyup" ,function(e){
+            if (e.keyCode === 13) {
+                e.preventDefault();
+                document.querySelector('.loginButton').click();
+            }});
 
         //   this.renderChangeUserList();
     }
 
+    pressLoginByEnter(e){
+    if (e.keyCode === 13) {
+    e.preventDefault();
+    document.querySelector('.loginButton').click();
+}
+    }
+
+
     renderRegisterPage() {
         this.container.innerHTML = registerPage;
-        this.container.querySelector('.cancel').addEventListener('click', this.renderLogin().bind(this));
+        this.container.querySelector('.cancel').addEventListener('click', this.renderLogin.bind(this));
         this.container.querySelector('.emailInput').oninput = e => onTypingEmail(this, e);
         this.container.querySelector('.passwordInput').oninput = e => onTypingPassword(this, e);
         this.container.querySelector('.passwordRepeat').oninput = e => onRepeatingPassword(this, e);
         this.container.querySelector('.nameInput').oninput = e => onTypingName(this, e);
         this.container.querySelector('.registerBtn').addEventListener('click', this.onRegistration.bind(this));
-
+        this.container.querySelector('.emailInput').addEventListener("keyup" ,function(e){
+            if (e.keyCode === 13) {
+                e.preventDefault();
+                document.querySelector('.registerBtn').click();
+            }});
+        this.container.querySelector('.passwordInput').addEventListener("keyup" ,function(e){
+            if (e.keyCode === 13) {
+                e.preventDefault();
+                document.querySelector('.registerBtn').click();
+            }});
+        this.container.querySelector('.passwordRepeat').addEventListener("keyup" ,function(e){
+            if (e.keyCode === 13) {
+                e.preventDefault();
+                document.querySelector('.registerBtn').click();
+            }});
+        this.container.querySelector('.nameInput').addEventListener("keyup" ,function(e){
+            if (e.keyCode === 13) {
+                e.preventDefault();
+                document.querySelector('.registerBtn').click();
+            }});
 
     }
 
@@ -412,7 +454,7 @@ return getItem()
     .then(response => response.json())
     .then(payload => {
         if (payload.success === true){
-            this.currentID = payload.user
+            this.currentID = payload.id
             this.renderChat()
             this.container.querySelector('.currentUserName').innerHTML ='Current User : ' + payload.name
 
