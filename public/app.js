@@ -314,7 +314,6 @@ export default class App {
     }
 
     killSession(){
-        console.log('Hello')
         fetch(`/logout.php`, {
             method: 'GET',
             headers: {
@@ -430,11 +429,10 @@ export default class App {
             .then(response => {
                 if (response.success === false) {
 
-                    console.log('Wrong Email or Password')
+                    alert('Wrong Email or Password')
 
                 }
                 else {
-                    console.log('Login Successful');
                     this.currentID = response.id
                     this.renderChat()
                     this.container.querySelector('.currentUserName').innerHTML ='Current User : ' + response.name
