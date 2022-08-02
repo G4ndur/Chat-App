@@ -2,9 +2,9 @@ import Message from "./message.js";
 import User from "./user.js";
 import {inactiveContact, inactiveContactMod, messageReceived, messageSent} from "./template.js";
 import {ServerContactsStore, ServerMessageStore} from "./server_storages.js";
-import {onTypingEmail, onTypingName, onTypingChatMessage, onTypingPassword, onRepeatingPassword} from "./inputs.js";
+import {onRepeatingPassword, onTypingChatMessage, onTypingEmail, onTypingName, onTypingPassword} from "./inputs.js";
 import UserRepository from "./userRepository.js";
-import {getItem} from "./session.js"
+import {getItem} from "./session.js";
 
 const contactStorage = new ServerContactsStore();
 const messageStorage = new ServerMessageStore();
@@ -204,11 +204,12 @@ export default class App {
 
         this.container.querySelector('.form-control').oninput = e => onTypingChatMessage(this, e);
         this.container.querySelector('.fa-send').addEventListener('click', this.onSend.bind(this));
-        this.container.querySelector('.form-control').addEventListener("keyup" ,function(event){
+        this.container.querySelector('.form-control').addEventListener("keyup", function (event) {
             if (event.keyCode === 13) {
                 event.preventDefault();
                 document.querySelector('.fa-send').click();
-            }});
+            }
+        });
         this.container.querySelector('.change').addEventListener('click', this.onLogout.bind(this));
 
         const userList = this.container.querySelector('.chat-list');
@@ -253,7 +254,6 @@ export default class App {
     }
 
 
-
     /**
      *
      */
@@ -269,7 +269,7 @@ export default class App {
         } else if (this.passwordInput !== this.passwordRepeatInput) {
             alert('Passwords arent identical');
         } else {
-            const user = new User( null ,this.nameInput, this.emailInput, this.passwordInput)
+            const user = new User(null, this.nameInput, this.emailInput, this.passwordInput);
             userRepository.save(user)
                 .then(response => response.json())
                 .then(response => {
@@ -313,7 +313,7 @@ export default class App {
 
     }
 
-    killSession(){
+    killSession() {
         fetch(`/logout.php`, {
             method: 'GET',
             headers: {
@@ -329,25 +329,27 @@ export default class App {
         this.container.querySelector('.emailInput').oninput = e => onTypingEmail(this, e);
         this.container.querySelector('.passwordInput').oninput = e => onTypingPassword(this, e);
         this.container.querySelector('.loginButton').addEventListener('click', this.onLogin.bind(this));
-        this.container.querySelector('.passwordInput').addEventListener("keyup" ,function(e){
+        this.container.querySelector('.passwordInput').addEventListener("keyup", function (e) {
             if (e.keyCode === 13) {
                 e.preventDefault();
                 document.querySelector('.loginButton').click();
-            }});
-        this.container.querySelector('.emailInput').addEventListener("keyup" ,function(e){
+            }
+        });
+        this.container.querySelector('.emailInput').addEventListener("keyup", function (e) {
             if (e.keyCode === 13) {
                 e.preventDefault();
                 document.querySelector('.loginButton').click();
-            }});
+            }
+        });
 
         //   this.renderChangeUserList();
     }
 
-    pressLoginByEnter(e){
-    if (e.keyCode === 13) {
-    e.preventDefault();
-    document.querySelector('.loginButton').click();
-}
+    pressLoginByEnter(e) {
+        if (e.keyCode === 13) {
+            e.preventDefault();
+            document.querySelector('.loginButton').click();
+        }
     }
 
 
@@ -359,26 +361,30 @@ export default class App {
         this.container.querySelector('.passwordRepeat').oninput = e => onRepeatingPassword(this, e);
         this.container.querySelector('.nameInput').oninput = e => onTypingName(this, e);
         this.container.querySelector('.registerBtn').addEventListener('click', this.onRegistration.bind(this));
-        this.container.querySelector('.emailInput').addEventListener("keyup" ,function(e){
+        this.container.querySelector('.emailInput').addEventListener("keyup", function (e) {
             if (e.keyCode === 13) {
                 e.preventDefault();
                 document.querySelector('.registerBtn').click();
-            }});
-        this.container.querySelector('.passwordInput').addEventListener("keyup" ,function(e){
+            }
+        });
+        this.container.querySelector('.passwordInput').addEventListener("keyup", function (e) {
             if (e.keyCode === 13) {
                 e.preventDefault();
                 document.querySelector('.registerBtn').click();
-            }});
-        this.container.querySelector('.passwordRepeat').addEventListener("keyup" ,function(e){
+            }
+        });
+        this.container.querySelector('.passwordRepeat').addEventListener("keyup", function (e) {
             if (e.keyCode === 13) {
                 e.preventDefault();
                 document.querySelector('.registerBtn').click();
-            }});
-        this.container.querySelector('.nameInput').addEventListener("keyup" ,function(e){
+            }
+        });
+        this.container.querySelector('.nameInput').addEventListener("keyup", function (e) {
             if (e.keyCode === 13) {
                 e.preventDefault();
                 document.querySelector('.registerBtn').click();
-            }});
+            }
+        });
 
     }
 
@@ -421,45 +427,43 @@ export default class App {
     /**
      *
      */
-    onLogin()
-    {
-        const userLogin = new User(null,'', this.emailInput, this.passwordInput)
+    onLogin() {
+        const userLogin = new User(null, '', this.emailInput, this.passwordInput);
         userRepository.login(userLogin)
             .then(response => response.json())
             .then(response => {
                 if (response.success === false) {
 
-                    alert('Wrong Email or Password')
+                    alert('Wrong Email or Password');
+
+                } else {
+                    this.currentID = response.id;
+                    this.renderChat();
+                    this.container.querySelector('.currentUserName').innerHTML = 'Current User : ' + response.name;
 
                 }
-                else {
-                    this.currentID = response.id
-                    this.renderChat()
-                    this.container.querySelector('.currentUserName').innerHTML ='Current User : ' + response.name
-
-                }
-            })
+            });
 
 
-};
+    };
 
     /**
      *
      * @returns {Promise<any>}
      */
-    loggedInCheck(){
-return getItem()
-    .then(response => response.json())
-    .then(payload => {
-        if (payload.success === true){
-            this.currentID = payload.id
-            this.renderChat()
-            this.container.querySelector('.currentUserName').innerHTML ='Current User : ' + payload.name
+    loggedInCheck() {
+        return getItem()
+            .then(response => response.json())
+            .then(payload => {
+                if (payload.success === true) {
+                    this.currentID = payload.id;
+                    this.renderChat();
+                    this.container.querySelector('.currentUserName').innerHTML = 'Current User : ' + payload.name;
+                    return;
+                }
+                this.renderLogin();
 
-        }
-        else {this.renderLogin()}
-
-    })
+            });
 
 
     }

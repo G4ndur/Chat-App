@@ -41,7 +41,7 @@ class LoginRequestHandler
         $login = json_decode($body, true);
 
         $foundUser = $this->userRepository->findOneByMail($login['email']);
-        if (password_verify($login['password'], $foundUser->getPassword()) === true) {
+        if (password_verify($login['password'], $foundUser->getPassword())) {
         $this->session->set('is_logged_in', true);
         $this->session->set('user_id', $foundUser->getId());
         $this->session->set('user_name', $foundUser->getName());
