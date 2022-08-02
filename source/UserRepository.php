@@ -50,7 +50,7 @@ class UserRepository implements ProvidesUsers
         $statement->execute([
             'name' => $user->getName(),
             'email' => $user->getEmail(),
-            'password' => $user->getPassword()
+            'password' => password_hash($user->getPassword(),PASSWORD_BCRYPT)
 
         ]);
     }
