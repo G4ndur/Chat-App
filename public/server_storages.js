@@ -65,8 +65,14 @@ export class ServerMessageStore {
     /**
      * @returns Promise<any>
      */
-    load() {
-        return serverStorage.getItem('messages')
+    load(activeID, currentID) {
+        const chatIds = []
+        chatIds.current = currentID
+        chatIds.active = activeID
+        return fetch(`/storage.php?key=id`, {
+            method: 'POST',
+            body: JSON.stringify(chatIds)
+        }).then(response =>{ return serverStorage.getItem('messages')
             .then(respond => respond.json())
             .then(payload => {
                 payload.messages = payload.messages || [];
@@ -82,7 +88,8 @@ export class ServerMessageStore {
                     );
                 });
                 return payload;
-            });
+            });})
+
 
     };
 

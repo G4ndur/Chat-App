@@ -54,8 +54,8 @@ class UserRepository implements ProvidesUsers
 
         ]);
     }
-//    /**
-//     * @param string $email
+    //    /**
+    //     * @param string $email
 //     * @return void
 //     */
 //        public function fetch(string $email){

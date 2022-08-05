@@ -8,12 +8,18 @@ class DatabaseMessageStorage implements StoresMessages
      * @var PDO
      */
     private $connection;
+    /**
+     * @var Session
+     */
+    private $session;
 
     /**
      * @param PDO $connection
+     * @param Session $session
      */
-    public function __construct(PDO $connection)
+    public function __construct(PDO $connection, Session  $session)
     {
+        $this->session = $session;
         $this->connection = $connection;
     }
 
@@ -50,8 +56,12 @@ class DatabaseMessageStorage implements StoresMessages
         $payload = ['messages' => []];
 
         $statement = $this->connection->prepare(
-            "SELECT content, sent_at, sender_id, receiver_id FROM messages");
-        $statement->execute();
+            "SELECT content, sent_at, sender_id, receiver_id FROM messages WHERE receiver_id = :active_user 
+AND sender_id = :current_user");
+        $statement->execute([
+            'active_user' => $this->session->get('activeUser'),
+            'current_user' => $this->session->get('currentUser')
+        ]);
         $statement->setFetchMode(PDO::FETCH_ASSOC);
 
         foreach ($statement as $record) {

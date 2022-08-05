@@ -8,14 +8,19 @@ class StorageRequestHandler
     /** @var StoresMessages */
     private $messageStorage;
 
+    /** @var Session */
+    private $session;
+
     /**
      * @param StoresContacts $contactStorage
      * @param StoresMessages $messageStorage
+     * @param Session $session
      */
-    public function __construct(StoresContacts $contactStorage, StoresMessages $messageStorage)
+    public function __construct(StoresContacts $contactStorage, StoresMessages $messageStorage, Session  $session)
     {
         $this->contactStorage = $contactStorage;
         $this->messageStorage = $messageStorage;
+        $this->session = $session;
     }
 
     /**
@@ -51,6 +56,11 @@ class StorageRequestHandler
 
             if ($key === 'messages') {
                 $this->messageStorage->save($body);
+            }
+            if ($key === 'id') {
+ $userIds = json_decode($body);
+ $this->session->set('activeUser', $userIds['active']);
+ $this->session->set('currentUser', $userIds['current']);
             }
 
             return $response;

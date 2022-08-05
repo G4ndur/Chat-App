@@ -190,6 +190,7 @@ export default class App {
     }
 
     queryAndRenderMessages() {
+
         messageStorage.load()
             .then(storedMessages => {
                 this.messages = storedMessages.messages;
